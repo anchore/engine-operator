@@ -1,0 +1,5 @@
+---
+- version: v1alpha1
+  group: anchore.com
+  kind: AnchoreEngine
+  chart: /opt/helm/helm-charts/anchore-engine
