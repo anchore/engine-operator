@@ -1,0 +1,304 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [{
+        "apiVersion": "anchore.com/v1alpha1",
+        "kind": "AnchoreEngine",
+        "metadata": {
+          "name": "example-anchoreengine"
+        },
+        "spec": {
+          "anchoreAnalyzer": {
+            "affinity": {},
+            "annotations": {},
+            "concurrentTasksPerWorker": 1,
+            "containerPort":8084,
+            "cycleTimers": {
+              "image_analyzer": 5
+            },
+            "extraEnv": [],
+            "nodeSelector": {},
+            "replicaCount": 1,
+            "scratchVolume": {
+              "details": {
+                "emptyDir": {}
+              },
+              "mountPath": "/scratch"
+            },
+            "tolerations":[]
+          },
+          "anchoreApi": {
+            "affinity":{},
+            "annotations": {},
+            "extraEnv": [],
+            "nodeSelector": {},
+            "replicaCount": 1,
+            "service": {
+              "annotations": {},
+              "port": 8228,
+              "type": "ClusterIP"
+            },
+            "tolerations": []
+          },
+          "anchoreCatalog": {
+            "affinity": {},
+            "annotations": {},
+            "archive": {
+              "compression": {
+                "enabled": true,
+                "min_size_kbytes": 100
+              },
+              "storage_driver": {
+                "config": {},
+                "name": "db"
+              }
+            },
+            "cycleTimers": {
+              "analyzer_queue": 1,
+              "image_watcher": 3600,
+              "notifications": 30,
+              "policy_eval": 3600,
+              "repo_watcher": 60,
+              "service_watcher": 15,
+              "vulnerability_scan": 14400
+            },
+            "events": {
+              "notification": {
+                "enabled": false,
+                "level": ["error"]
+              }
+            },
+            "extraEnv": [],
+            "nodeSelector": {},
+            "replicaCount": 1,
+            "service": {
+              "annotations": {},
+              "port": 8082,
+              "type": "ClusterIP"
+            },
+            "tolerations": []
+          },
+          "anchoreGlobal": {
+            "allowECRUseIAMRole": false,
+            "dbConfig": {
+              "connectionPoolMaxOverflow": 100,
+              "connectionPoolSize": 30,
+              "ssl": false,
+              "timeout": 120
+            },
+            "defaultAdminEmail": "example@email.com",
+            "defaultAdminPassword": "foobar",
+            "enableMetrics": false,
+            "existingSecret": "",
+            "extraEnv": [],
+            "image": "registry.connect.redhat.com/anchore/engine4:latest",
+            "imagePullPolicy": "IfNotPresent",
+            "internalServicesSsl": {
+              "certDir": "/certs",
+              "certSecret": null,
+              "certSecretCertName": "tls.crt",
+              "certSecretKeyName": "tls.key",
+              "verifyCerts": false
+            },
+            "internalServicesSslEnabled": false,
+            "logLevel": "INFO",
+            "serviceDir": "/anchore_service_config",
+            "webhooks": {
+              "general": {},
+              "ssl_verify": true,
+              "webhook_password": null,
+              "webhook_user": null
+            },
+            "webhooksEnabled": false
+          },
+          "anchorePolicyEngine": {
+            "affinity": {},
+            "annotations": {},
+            "cycleTimers": {
+              "feed_sync": 14400,
+              "feed_sync_checker": 3600
+            },
+            "extraEnv": [],
+            "nodeSelector": {},
+            "replicaCount": 1,
+            "service": {
+              "annotations": {},
+              "port": 8087,
+              "type": "ClusterIP"
+            },
+            "tolerations": []
+          },
+          "anchoreSimpleQueue": {
+            "affinity": {},
+            "annotations": {},
+            "extraEnv": [],
+            "nodeSelector": {},
+            "replicaCount": 1,
+            "service": {
+              "annotations": {},
+              "port": 8083,
+              "type": "ClusterIP"
+            },
+            "tolerations": []
+          },
+          "cloudsql": {
+            "enabled": false,
+            "image": {
+              "pullPolicy": "IfNotPresent",
+              "repository": "gcr.io/cloudsql-docker/gce-proxy",
+              "tag":1.12
+            },
+            "instance": ""
+          },
+          "ingress": {
+            "annotations": {
+              "kubernetes.io/ingress.class": "nginx"
+            },
+            "apiPath": "/v1/",
+            "enabled": false,
+            "tls": []
+          },
+          "postgresql": {
+            "externalEndpoint": null,
+            "persistence": {
+              "size": "20Gi"
+            },
+            "postgresDatabase": "anchore",
+            "postgresPassword": "anchore-postgres,123",
+            "postgresUser": "anchoreengine"
+          }
+        }
+      }]
+    capabilities: Basic Install
+  name: anchore-engine-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: AnchoreEngine
+      name: anchoreengines.anchore.com
+      version: v1alpha1
+  description: Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement.
+  displayName: Anchore Engine Operator
+  maintainers:
+  - name: Brady Todhunter
+    email: bradyt@anchore.com
+  - name: Zach Hill
+    email: zach@anchore.com
+  keywords:
+  - analysis
+  - docker
+  - anchore
+  - "anchore-engine"
+  - image
+  - security
+  - vulnerability
+  - scanner
+  provider:
+    name: Anchore Inc.
+  links:
+  - name: Anchore
+    url: https://www.anchore.com
+  - name: Operator Repository
+    url: https://github.com/anchore/engine-operator
+  - name: Anchore Engine Repository
+    url: https://github.com/anchore/anchore-engine
+  install:
+    spec:
+      deployments:
+      - name: anchore-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: anchore-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: anchore-operator
+            spec:
+              containers:
+              - env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: anchore-operator
+                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.0-b1
+                imagePullPolicy: Always
+                name: anchore-operator
+                resources: {}
+              serviceAccountName: anchore-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          - extensions
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - anchore-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - anchore.com
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        serviceAccountName: anchore-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  version: 0.0.1

@@ -8,6 +8,6 @@ LABEL name="Anchore Engine Operator" \
       summary="Anchore Engine OSS helm based operator." \
       description="Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement."
 
-COPY LICENSE /licenses/LICENSE
+COPY licenses /licenses
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-charts/ ${HOME}/helm-charts/
