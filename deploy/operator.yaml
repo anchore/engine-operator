@@ -15,8 +15,7 @@ spec:
       serviceAccountName: anchore-operator
       containers:
         - name: anchore-operator
-          # Replace this with the built image name
-          image: docker.io/btodhunter/anchore-operator:latest
+          image: docker.io/anchore/engine-operator:latest
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE

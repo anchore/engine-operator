@@ -4,7 +4,7 @@ metadata:
   annotations:
     capabilities: Basic Install
     certified: true
-    containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.0-b1
+    containerImage: docker.io/anchore/engine-operator:latest
     createdAt: 2019-05-01T07:00:00Z
     support: anchore.slack.com
     categories: "Policy Enforcement,Security,Dev Tools"
@@ -243,7 +243,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-operator
-                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.0-b1
+                image: docker.io/anchore/engine-operator:latest
                 imagePullPolicy: Always
                 name: anchore-operator
                 resources: {}
