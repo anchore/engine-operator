@@ -187,6 +187,8 @@ spec:
     owned:
     - kind: AnchoreEngine
       name: anchoreengines.anchore.com
+      displayName: Anchore Engine Operator
+      description: Deploys Anchore Engine
       version: v1alpha1
   description: |-
     The Anchore Engine Operator is based on the [Helm Chart](https://github.com/helm/charts/tree/master/stable/anchore-engine). 
