@@ -7,7 +7,7 @@ metadata:
     containerImage: registry.connect.redhat.com/anchore/engine-operator:latest
     createdAt: 2019-05-01T07:00:00Z
     support: anchore.slack.com
-    categories: "Policy Enforcement,Security,Dev Tools"
+    categories: "Security"
     repository: https://github.com/anchore/engine-operator
     description: Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement.
     alm-examples: |-
