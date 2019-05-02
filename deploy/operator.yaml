@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: anchore-operator
+  name: anchore-engine-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: anchore-operator
+      name: anchore-engine-operator
   template:
     metadata:
       labels:
-        name: anchore-operator
+        name: anchore-engine-operator
     spec:
-      serviceAccountName: anchore-operator
+      serviceAccountName: anchore-engine-operator
       containers:
-        - name: anchore-operator
-          image: docker.io/anchore/engine-operator:latest
+        - name: anchore-engine-operator
+          image: docker.io/anchore/engine-operator:dev
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -27,4 +27,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "anchore-operator"
+              value: "anchore-engine-operator"

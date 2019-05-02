@@ -3,7 +3,7 @@ kind: ClusterServiceVersion
 metadata:
   annotations:
     capabilities: Basic Install
-    certified: true
+    certified: "true"
     containerImage: docker.io/anchore/engine-operator:latest
     createdAt: 2019-05-01T07:00:00Z
     support: anchore.slack.com
@@ -219,17 +219,17 @@ spec:
   install:
     spec:
       deployments:
-      - name: anchore-operator
+      - name: anchore-engine-operator
         spec:
           replicas: 1
           selector:
             matchLabels:
-              name: anchore-operator
+              name: anchore-engine-operator
           strategy: {}
           template:
             metadata:
               labels:
-                name: anchore-operator
+                name: anchore-engine-operator
             spec:
               containers:
               - env:
@@ -242,12 +242,12 @@ spec:
                     fieldRef:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
-                  value: anchore-operator
+                  value: anchore-engine-operator
                 image: docker.io/anchore/engine-operator:latest
                 imagePullPolicy: Always
-                name: anchore-operator
+                name: anchore-engine-operator
                 resources: {}
-              serviceAccountName: anchore-operator
+              serviceAccountName: anchore-engine-operator
       permissions:
       - rules:
         - apiGroups:
@@ -288,7 +288,7 @@ spec:
         - apiGroups:
           - apps
           resourceNames:
-          - anchore-operator
+          - anchore-engine-operator
           resources:
           - deployments/finalizers
           verbs:
@@ -299,7 +299,7 @@ spec:
           - '*'
           verbs:
           - '*'
-        serviceAccountName: anchore-operator
+        serviceAccountName: anchore-engine-operator
     strategy: deployment
   installModes:
   - supported: true

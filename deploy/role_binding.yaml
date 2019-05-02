@@ -1,11 +1,11 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: anchore-operator
+  name: anchore-engine-operator
 subjects:
 - kind: ServiceAccount
-  name: anchore-operator
+  name: anchore-engine-operator
 roleRef:
   kind: Role
-  name: anchore-operator
+  name: anchore-engine-operator
   apiGroup: rbac.authorization.k8s.io

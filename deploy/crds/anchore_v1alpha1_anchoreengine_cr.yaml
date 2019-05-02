@@ -61,7 +61,7 @@ spec:
   # Global configuration shared by all anchore-engine services.
   anchoreGlobal:
     # Image used for all anchore engine deployments (excluding enterprise components).
-    image: registry.connect.redhat.com/anchore/engine4:latest
+    image: docker.io/anchore/anchore-engine:v0.3.4
     imagePullPolicy: IfNotPresent
 
     # Set extra environment variables. These will be set on all containers.
