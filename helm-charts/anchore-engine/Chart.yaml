@@ -1,23 +1,23 @@
+name: anchore-engine
+version: 0.13.0
 appVersion: 0.3.3
 description: Anchore container analysis and policy evaluation engine service
-engine: gotpl
-home: https://anchore.com
-icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 keywords:
-- analysis
-- docker
-- anchore
-- anchore-engine
-- image
-- security
-- vulnerability
-- scanner
-maintainers:
-- email: zach@anchore.com
-  name: zhill
-- email: bradyt@anchore.com
-  name: btodhunter
-name: anchore-engine
+ - analysis
+ - docker
+ - anchore
+ - "anchore-engine"
+ - image
+ - security
+ - vulnerability
+ - scanner
+home: https://anchore.com
 sources:
-- https://github.com/anchore/anchore-engine
-version: 0.12.2
+ - https://github.com/anchore/anchore-engine
+maintainers:
+ - name: zhill
+   email: zach@anchore.com
+ - name: btodhunter
+   email: bradyt@anchore.com
+engine: gotpl
+icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png

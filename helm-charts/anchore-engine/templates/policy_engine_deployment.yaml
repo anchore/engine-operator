@@ -20,9 +20,9 @@ spec:
       labels:
         app: {{ template "anchore-engine.fullname" . }}
         component: {{ $component }}
-{{- if .Values.anchorePolicyEngine.annotations }}
+{{- with .Values.anchorePolicyEngine.annotations }}
       annotations:
-{{ toYaml .Values.anchorePolicyEngine.annotations | indent 8 }}
+        {{ toYaml . | nindent 8 | trim }}
 {{- end }}
     spec:
       containers:
@@ -40,17 +40,15 @@ spec:
         args: ["service", "start", "policy_engine"]
         envFrom:
         - secretRef:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}
         env:
-        {{- range $key, $value := .Values.anchoreGlobal.extraEnv }}
-        - name: {{ $key }}
-          value: {{ $value }}
+        {{- with .Values.anchoreGlobal.extraEnv }}
+          {{- toYaml . | nindent 8 | trim }}
         {{- end }}
-        {{- range $key, $value := .Values.anchorePolicyEngine.extraEnv }}
-        - name: {{ $key }}
-          value: {{ $value }}
+        {{- with .Values.anchorePolicyEngine.extraEnv }}
+          {{- toYaml . | nindent 8 | trim }}
         {{- end }}
         - name: ANCHORE_POD_NAME
           valueFrom:
@@ -85,8 +83,10 @@ spec:
           periodSeconds: 10
           failureThreshold: 3
           successThreshold: 1
+        {{- with .Values.anchorePolicyEngine.resources }}
         resources:
-{{ toYaml .Values.anchorePolicyEngine.resources | indent 10 }}
+          {{ toYaml . | nindent 10 | trim }}
+        {{- end }}
       volumes:
         - name: config-volume
           configMap:
@@ -96,18 +96,18 @@ spec:
           secret:
             secretName: {{ .Values.anchoreGlobal.internalServicesSsl.certSecret }}
         {{- end }}
-    {{- if .Values.anchorePolicyEngine.nodeSelector }}
+      {{- with .Values.anchoreCatalog.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.anchorePolicyEngine.nodeSelector | indent 8 }}
-    {{- end }}
-    {{- with .Values.anchorePolicyEngine.affinity }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
+      {{- with .Values.anchoreCatalog.affinity }}
       affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.anchorePolicyEngine.tolerations }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
+      {{- with .Values.anchoreCatalog.tolerations }}
       tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
 
 ---
 apiVersion: v1
@@ -120,9 +120,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: {{ $component }}
-  {{- if .Values.anchorePolicyEngine.service.annotations }}
+  {{- with .Values.anchorePolicyEngine.service.annotations }}
   annotations:
-{{ toYaml .Values.anchorePolicyEngine.service.annotations | indent 4 }}
+    {{ toYaml . | nindent 4 | trim }}
   {{- end }}
 spec:
   type: {{ .Values.anchorePolicyEngine.service.type }}

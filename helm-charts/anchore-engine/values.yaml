@@ -37,14 +37,10 @@ ingress:
   enabled: false
   # Uncomment the following paths for GCE/ALB ingress controller
   # apiPath: /v1/*
-  # uiPath: /*
   apiPath: /v1/
-  uiPath: /
   # Uncomment the following lines to bind on specific hostnames
   # apiHosts:
   #   - anchore-api.example.com
-  # uiHosts:
-  #   - anchore-ui.example.com
   annotations:
     # kubernetes.io/ingress.class: gce
     kubernetes.io/ingress.class: nginx
@@ -60,12 +56,16 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.3.3
+  image: registry.connect.redhat.com/anchore/engine4:latest
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all containers.
-  extraEnv: {}
-    # FOO: bar
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  # Specifies an existing secret to be used for admin and db passwords
+  existingSecret: ""
 
   ###
   # Start of General Anchore Engine Configurations (populates /config/config.yaml)
@@ -125,8 +125,9 @@ anchoreAnalyzer:
   containerPort: 8084
 
   # Set extra environment variables. These will be set only on analyzer containers.
-  extraEnv: {}
-    # FOO: bar
+  extraEnv: []
+    # - name: foo
+    #   value: bar
 
   # The cycle timer is the interval between checks to the work queue for new jobs
   cycleTimers:
@@ -163,8 +164,9 @@ anchoreApi:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all api containers.
-  extraEnv: {}
-    # FOO: bar
+  extraEnv: []
+    # - name: foo
+    #   value: bar
 
   # kubernetes service configuration for anchore external API
   service:
@@ -189,8 +191,9 @@ anchoreCatalog:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all catalog containers.
-  extraEnv: {}
-    # FOO: bar
+  extraEnv: []
+    # - name: foo
+    #   value: bar
 
   # Intervals to run specific events on (seconds)
   cycleTimers:
@@ -290,8 +293,9 @@ anchorePolicyEngine:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all policy engine containers.
-  extraEnv: {}
-    # FOO: bar
+  extraEnv: []
+    # - name: foo
+    #   value: bar
 
   # Intervals to run specific events on (seconds)
   cycleTimers:
@@ -324,8 +328,9 @@ anchoreSimpleQueue:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all simplequeue containers.
-  extraEnv: {}
-    # FOO: bar
+  extraEnv: []
+    # - name: foo
+    #   value: bar
 
   # kubernetes service configuration for anchore simplequeue api
   service:
@@ -345,173 +350,3 @@ anchoreSimpleQueue:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
-# This section is used for configuring anchore enterprise.
-anchoreEnterpriseGlobal:
-  enabled: false
-  # Name of kubernetes secret containing your license.yaml file.
-  # Create this secret with the following command - kubectl create secret generic anchore-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
-  licenseSecretName: anchore-enterprise-license
-
-  image: docker.io/anchore/enterprise:v0.3.3
-  imagePullPolicy: IfNotPresent
-  # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
-  # Create this secret with the following command - kubectl create secret docker-registry anchore-dockerhub-creds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
-  imagePullSecretName: anchore-enterprise-pullcreds
-
-# Configure the second postgres database instance for the enterprise feeds service.
-# Only utilized if anchoreEnterpriseFeeds.enabled: true
-anchore-feeds-db:
-  # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
-  # enabled: false
-  postgresUser: anchoreengine
-  postgresPassword: anchore-postgres,123
-  postgresDatabase: anchore-feeds
-
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
-  # Configure size of the persitant volume used with helm managed chart.
-  # This should be commented out if using an external endpoint.
-  persistence:
-    size: 20Gi
-
-# Configure & enable the Anchore Enterprise on-prem feeds service.
-anchoreEnterpriseFeeds:
-  # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
-  enabled: true
-
-  # Set extra environment variables. These will be set on all feeds containers.
-  extraEnv: {}
-    # FOO: bar
-
-  # Time delay in seconds between consecutive driver runs for processing data
-  cycleTimers:
-    driver_sync: 7200
-
-  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
-  dbConfig:
-    timeout: 120
-    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs only for the time being
-    ssl: false
-    connectionPoolSize: 30
-    connectionPoolMaxOverflow: 100
-
-  # kubernetes service configuration for anchore feeds service api
-  service:
-    type: ClusterIP
-    port: 8448
-    annotations: {}
-
-  # Staging space for holding normalized output from drivers.
-  scratchVolume:
-    mountPath: /scratch
-    details:
-      # Specify volume configuration here
-      emptyDir: {}
-
-  # resources:
-  #  limits:
-  #    cpu: 100m
-  #    memory: 8Gi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 3Gi
-
-  annotations: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-
-# Configure the Anchore Enterprise role based access control component.
-# This component consists of 2 containers that run as side-cars in the anchore engine api pod.
-anchoreEnterpriseRbac:
-  enabled: true
-
-  # Set extra environment variables. These will be set on all rbac containers.
-  extraEnv: {}
-    # FOO: bar
-
-  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
-  # Due to RBAC sharing a service with the general API.
-  service:
-    apiPort: 8229
-    authPort: 8089
-
-  # authResources:
-  #  limits:
-  #    cpu: 100m
-  #    memory: 8Gi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 3Gi
-
-  # managerResources:
-  #  limits:
-  #    cpu: 100m
-  #    memory: 8Gi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 3Gi
-
-# Configure the Anchore Enterprise UI.
-anchoreEnterpriseUi:
-  # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
-  enabled: true
-
-  # Set extra environment variables. These will be set on all UI containers.
-  extraEnv: {}
-    # FOO: bar
-
-  # Specifies whether to trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header).
-  enableProxy: false
-  # Specifies if SSL is enabled in the web app container.
-  enableSsl: false
-  # Specifies if a single set of user credentials can be used to start multiple Anchore Enterprise UI sessions; for
-  # example, by multiple users across different systems, or by a single user on a single system across multiple browsers.
-  #
-  # When set to `false`, only one session per credential is permitted at a time, and logging in will invalidate any other
-  # sessions that are using the same set of credentials. Note that setting this property to `false` does not prevent a
-  # single session from being viewed within multiple *tabs* inside the same browser.
-  enableSharedLogin: true
-
-  image: docker.io/anchore/enterprise-ui:v0.3.1
-  imagePullPolicy: IfNotPresent
-
-  # kubernetes service configuration for anchore UI
-  service:
-    type: ClusterIP
-    port: 80
-    annotations: {}
-    sessionAffinity: ClientIP
-
-  # resources:
-  #  limits:
-  #    cpu: 100m
-  #    memory: 8Gi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 3Gi
-
-  annotations: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-
-# Anchore Engine Enterprise UI is dependent on redis for storing sessions
-# Only utilized if 'anchoreEnterpriseUi.enabled: true'
-anchore-ui-redis:
-  password: anchore-redis,123
-  cluster:
-    enabled: false
-  persistence:
-    enabled: false
-
-  # To use an external redis endpoint, uncomment to set 'enabled: false'
-  # enabled: false
-
-  # If 'enabled: false', specify an external redis endpoint -
-  # eg redis://:<password>@hostname:6379
-  externalEndpoint: Null

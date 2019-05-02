@@ -24,6 +24,7 @@ rules:
   - get
 - apiGroups:
   - apps
+  - extensions
   resources:
   - deployments
   - daemonsets

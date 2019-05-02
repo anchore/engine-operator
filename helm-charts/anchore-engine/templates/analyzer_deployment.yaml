@@ -20,10 +20,10 @@ spec:
       labels:
         app: "{{ template "anchore-engine.fullname" . }}"
         component: {{ $component }}
-{{- if .Values.anchoreAnalyzer.annotations }}
+      {{- with .Values.anchoreAnalyzer.annotations }}
       annotations:
-{{ toYaml .Values.anchoreAnalyzer.annotations | indent 8 }}
-{{- end }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
     spec:
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -40,17 +40,15 @@ spec:
         args: ["service", "start", "analyzer"]
         envFrom:
         - secretRef:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}
         env:
-        {{- range $key, $value := .Values.anchoreGlobal.extraEnv }}
-        - name: {{ $key }}
-          value: {{ $value }}
+        {{- with .Values.anchoreGlobal.extraEnv }}
+          {{- toYaml . | nindent 8 | trim }}
         {{- end }}
-        {{- range $key, $value := .Values.anchoreAnalyzer.extraEnv }}
-        - name: {{ $key }}
-          value: {{ $value }}
+        {{- with .Values.anchoreAnalyzer.extraEnv }}
+          {{- toYaml . | nindent 8 | trim }}
         {{- end }}
         - name: ANCHORE_POD_NAME
           valueFrom:
@@ -87,8 +85,10 @@ spec:
           periodSeconds: 10
           failureThreshold: 3
           successThreshold: 1
+        {{- with .Values.anchoreAnalyzer.resources }}
         resources:
-{{ toYaml .Values.anchoreAnalyzer.resources | indent 10 }}
+          {{ toYaml . | nindent 10 | trim }}
+        {{- end }}
       volumes:
         - name: config-volume
           configMap:
@@ -99,16 +99,16 @@ spec:
             secretName: {{ .Values.anchoreGlobal.internalServicesSsl.certSecret }}
         {{- end }}
         - name: analysis-scratch
-{{ toYaml .Values.anchoreAnalyzer.scratchVolume.details | indent 10 }}
-    {{- if .Values.anchoreAnalyzer.nodeSelector }}
+          {{ toYaml .Values.anchoreAnalyzer.scratchVolume.details | nindent 10 | trim }}
+      {{- with .Values.anchoreCatalog.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.anchoreAnalyzer.nodeSelector | indent 8 }}
-    {{- end }}
-    {{- with .Values.anchoreAnalyzer.affinity }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
+      {{- with .Values.anchoreCatalog.affinity }}
       affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.anchoreAnalyzer.tolerations }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
+      {{- with .Values.anchoreCatalog.tolerations }}
       tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+        {{ toYaml . | nindent 8 | trim }}
+      {{- end }}
