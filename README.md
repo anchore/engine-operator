@@ -6,12 +6,18 @@ This operator is based on the official [Helm Chart](https://github.com/helm/char
 
 All customizable values can be specified in `deploy/crds/anchore_v1alpha1_anchoreengine_cr.yaml` before creation.
 
-# Deploy Operator
+## Quickstart
 
 To stand up an Anchore Engine deployment on your cluster, issue the follow commands.
 
 ```yaml
 kubectl create -f deploy/crds/anchore_v1alpha1_anchoreengine_crd.yaml
-kubectl create -f deploy/
+kubectl create -f deploy
 kubectl create -f deploy/crds/anchore_v1alpha1_anchoreengine_cr.yaml
+```
+
+To delete the operator deployment, use the following command:
+```
+kubectl delete -f deploy/crds
+kubectl delete -f deploy
 ```
