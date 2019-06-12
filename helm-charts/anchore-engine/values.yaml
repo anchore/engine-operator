@@ -2,22 +2,38 @@
 
 # Anchore engine has a dependency on Postgresql, configure here
 postgresql:
+  image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+  imageTag: latest
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
-  postgresUser: anchoreengine
-  postgresPassword: anchore-postgres,123
+  postgresUser: anchore
+  postgresPassword: foobar
   postgresDatabase: anchore
 
   # Specify an external (already existing) postgres deployment for use.
   # Set to the host and port. eg. mypostgres.myserver.io:5432
   externalEndpoint: Null
 
-  # Configure size of the persitant volume used with helm managed chart.
+  # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
     resourcePolicy: nil
     size: 20Gi
+
+  extraEnv:
+  - name: POSTGRESQL_USER
+    value: anchore
+  - name: POSTGRESQL_PASSWORD
+    value: foobar
+  - name: POSTGRESQL_DATABASE
+    value: anchore
+  - name: PGUSER
+    value: postgres
+  - name: LD_LIBRARY_PATH
+    value: /opt/rh/rh-postgresql96/root/usr/lib64
+  - name: PATH
+    value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:

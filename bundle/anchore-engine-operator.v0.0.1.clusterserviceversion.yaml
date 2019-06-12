@@ -170,6 +170,8 @@ metadata:
           },
           "postgresql": {
             "externalEndpoint": null,
+            "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
+            "imageTag": "latest",
             "persistence": {
               "size": "20Gi"
             },
