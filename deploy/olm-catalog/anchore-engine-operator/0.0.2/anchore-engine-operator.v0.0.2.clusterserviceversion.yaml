@@ -5,7 +5,7 @@ metadata:
     capabilities: Basic Install
     certified: "true"
     containerImage: registry.connect.redhat.com/anchore/engine-operator:latest
-    createdAt: 2019-05-12T07:00:00Z
+    createdAt: 2019-06-12T07:00:00Z
     support: anchore.slack.com
     categories: "Security"
     repository: https://github.com/anchore/engine-operator
@@ -96,7 +96,7 @@ metadata:
             "enableMetrics": false,
             "existingSecret": "",
             "extraEnv": [],
-            "image": "docker.io/anchore/anchore-engine:v0.4.0",
+            "image": "registry.connect.redhat.com/anchore/engine4:latest",
             "imagePullPolicy": "IfNotPresent",
             "internalServicesSsl": {
               "certDir": "/home/anchore/certs",
@@ -276,7 +276,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: docker.io/anchore/engine-operator:latest
+                image: registry.connect.redhat.com/anchore/engine-operator:latest
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
