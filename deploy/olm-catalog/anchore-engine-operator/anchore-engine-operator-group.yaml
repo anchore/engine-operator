@@ -4,4 +4,4 @@ metadata:
   name: anchore-engine-operator-group
   spec:
     targetNamespaces:
-    - default
+    - anchore

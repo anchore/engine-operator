@@ -1,0 +1,4 @@
+packageName: anchore-engine
+channels:
+  - name: alpha
+    currentCSV: anchore-engine-operator.v0.0.2

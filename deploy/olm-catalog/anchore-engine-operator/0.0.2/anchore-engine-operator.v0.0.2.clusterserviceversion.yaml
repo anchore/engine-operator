@@ -5,7 +5,7 @@ metadata:
     capabilities: Basic Install
     certified: "true"
     containerImage: registry.connect.redhat.com/anchore/engine-operator:latest
-    createdAt: 2019-05-01T07:00:00Z
+    createdAt: 2019-05-12T07:00:00Z
     support: anchore.slack.com
     categories: "Security"
     repository: https://github.com/anchore/engine-operator
@@ -13,32 +13,27 @@ metadata:
     alm-examples: |-
       [{
         "apiVersion": "anchore.com/v1alpha1",
-        "kind": "AnchoreEngine",
+        "kind":"AnchoreEngine",
         "metadata": {
           "name": "example-anchoreengine"
         },
         "spec": {
           "anchoreAnalyzer": {
             "affinity": {},
-            "annotations": {},
-            "concurrentTasksPerWorker": 1,
+            "annotations":{},
+            "concurrentTasksPerWorker":1,
             "containerPort":8084,
             "cycleTimers": {
               "image_analyzer": 5
             },
             "extraEnv": [],
+            "layerCacheMaxGigabytes": 0,
             "nodeSelector": {},
             "replicaCount": 1,
-            "scratchVolume": {
-              "details": {
-                "emptyDir": {}
-              },
-              "mountPath": "/scratch"
-            },
-            "tolerations":[]
+            "tolerations": []
           },
           "anchoreApi": {
-            "affinity":{},
+            "affinity": {},
             "annotations": {},
             "extraEnv": [],
             "nodeSelector": {},
@@ -101,10 +96,10 @@ metadata:
             "enableMetrics": false,
             "existingSecret": "",
             "extraEnv": [],
-            "image": "registry.connect.redhat.com/anchore/engine4:latest",
+            "image": "docker.io/anchore/anchore-engine:v0.4.0",
             "imagePullPolicy": "IfNotPresent",
             "internalServicesSsl": {
-              "certDir": "/certs",
+              "certDir": "/home/anchore/certs",
               "certSecret": null,
               "certSecretCertName": "tls.crt",
               "certSecretKeyName": "tls.key",
@@ -112,7 +107,14 @@ metadata:
             },
             "internalServicesSslEnabled": false,
             "logLevel": "INFO",
-            "serviceDir": "/anchore_service_config",
+            "openShiftDeployment": true,
+            "scratchVolume": {
+              "details": {
+                "emptyDir": {}
+              },
+              "mountPath": "/analysis_scratch"
+            },
+            "serviceDir": "/anchore_service",
             "webhooks": {
               "general": {},
               "ssl_verify": true,
@@ -156,9 +158,9 @@ metadata:
             "image": {
               "pullPolicy": "IfNotPresent",
               "repository": "gcr.io/cloudsql-docker/gce-proxy",
-              "tag":1.12
+              "tag": 1.12
             },
-            "instance": ""
+            "instance":""
           },
           "ingress": {
             "annotations": {
@@ -170,9 +172,36 @@ metadata:
           },
           "postgresql": {
             "externalEndpoint": null,
+            "extraEnv": [
+              {
+                "name": "POSTGRESQL_USER",
+                "value": "anchoreengine"
+              },
+              {
+                "name": "POSTGRESQL_PASSWORD",
+                "value": "anchore-postgres,123"
+              },
+              {
+                "name": "POSTGRESQL_DATABASE",
+                "value": "anchore"
+              },
+              {
+                "name": "PGUSER",
+                "value": "postgres"
+              },
+              {
+                "name": "LD_LIBRARY_PATH",
+                "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
+              },
+              {
+                "name": "PATH",
+                "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              }
+            ],
             "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
             "imageTag": "latest",
             "persistence": {
+              "resourcePolicy": "nil",
               "size": "20Gi"
             },
             "postgresDatabase": "anchore",
@@ -181,8 +210,8 @@ metadata:
           }
         }
       }]
-  name: anchore-engine-operator.v0.0.1
-  namespace: placeholder
+  name: anchore-engine-operator.v0.0.2
+  namespace: anchore
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -247,7 +276,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: registry.connect.redhat.com/anchore/engine-operator:latest
+                image: docker.io/anchore/engine-operator:latest
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
@@ -315,4 +344,4 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
-  version: 0.0.1
+  version: 0.0.2
