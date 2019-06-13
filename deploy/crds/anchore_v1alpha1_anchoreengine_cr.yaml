@@ -7,8 +7,6 @@ spec:
 
   # Anchore engine has a dependency on Postgresql, configure here
   postgresql:
-    image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
-    imageTag: latest
     # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
     # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
     # enabled: false
@@ -26,19 +24,22 @@ spec:
       resourcePolicy: nil
       size: 20Gi
 
-    extraEnv:
-    - name: POSTGRESQL_USER
-      value: anchoreengine
-    - name: POSTGRESQL_PASSWORD
-      value: anchore-postgres,123
-    - name: POSTGRESQL_DATABASE
-      value: anchore
-    - name: PGUSER
-      value: postgres
-    - name: LD_LIBRARY_PATH
-      value: /opt/rh/rh-postgresql96/root/usr/lib64
-    - name: PATH
-      value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    # If running operator on OpenShift - uncomment the image, imageTag & extraEnv values below.
+    # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+    # imageTag: latest
+    # extraEnv:
+    # - name: POSTGRESQL_USER
+    #   value: anchoreengine
+    # - name: POSTGRESQL_PASSWORD
+    #   value: anchore-postgres,123
+    # - name: POSTGRESQL_DATABASE
+    #   value: anchore
+    # - name: PGUSER
+    #   value: postgres
+    # - name: LD_LIBRARY_PATH
+    #   value: /opt/rh/rh-postgresql96/root/usr/lib64
+    # - name: PATH
+    #   value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
   # Google CloudSQL support in GKE via gce-proxy
   cloudsql:
@@ -85,8 +86,8 @@ spec:
     image: docker.io/anchore/anchore-engine:v0.4.0
     imagePullPolicy: IfNotPresent
 
-    # Set this value to True to setup the chart for OpenShift deployment compatability.
-    openShiftDeployment: True
+    # Set this value to True to setup the chart for OpenShift deployment compatibility.
+    openShiftDeployment: False
 
     # Set extra environment variables. These will be set on all containers.
     extraEnv: []
@@ -132,7 +133,7 @@ spec:
     # Enable to force all anchore-engine services to communicate internally using SSL
     internalServicesSslEnabled: false
     internalServicesSsl:
-      # specify whether cert is verfied against the local certifacte bundle (allow self-signed certs if set to false)
+      # specify whether cert is verified against the local certificate bundle (allow self-signed certs if set to false)
       verifyCerts: false
       certDir: /home/anchore/certs
       certSecret: Null

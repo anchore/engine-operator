@@ -15,7 +15,7 @@ spec:
       serviceAccountName: anchore-engine-operator
       containers:
         - name: anchore-engine-operator
-          image: docker.io/anchore/engine-operator:dev
+          image: docker.io/anchore/engine-operator:latest
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
