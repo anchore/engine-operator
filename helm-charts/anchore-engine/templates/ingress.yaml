@@ -5,12 +5,18 @@ metadata:
   name: {{ template "anchore-engine.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{- with .Values.ingress.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
   {{- with .Values.ingress.annotations }}
   annotations:
-    {{ toYaml . | nindent 4 | trim }}
+    {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.ingress.tls }}
@@ -34,6 +40,17 @@ spec:
             serviceName: {{ template "anchore-engine.api.fullname" $ }}
             servicePort: {{ $.Values.anchoreApi.service.port }}
     {{- end }}
+    {{- if and (and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseUi.enabled) .Values.ingress.uiHosts }}
+    {{- range .Values.ingress.uiHosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+        - path: {{ $.Values.ingress.uiPath }}
+          backend:
+            serviceName: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+            servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
+    {{- end }}
+    {{- end }}
   {{- else }}
     - http:
         paths:
@@ -41,5 +58,11 @@ spec:
           backend:
             serviceName: {{ template "anchore-engine.api.fullname" $ }}
             servicePort: {{ $.Values.anchoreApi.service.port }}
+        {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseUi.enabled }}
+        - path: {{ $.Values.ingress.uiPath }}
+          backend:
+            serviceName: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+            servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
+        {{- end }}
   {{- end }}
 {{- end -}}
