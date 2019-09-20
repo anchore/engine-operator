@@ -2,4 +2,4 @@ channels:
 - currentCSV: anchore-engine-operator.v0.1.0
   name: alpha
 defaultChannel: alpha
-packageName: anchore-engine-operator
+packageName: anchore-engine

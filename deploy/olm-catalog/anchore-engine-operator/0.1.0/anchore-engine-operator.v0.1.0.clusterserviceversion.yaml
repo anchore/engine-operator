@@ -258,7 +258,7 @@ metadata:
             "existingSecret":null,
             "extraEnv":[],
             "hashedPasswords":false,
-            "image":"docker.io/anchore/anchore-engine:v0.5.0",
+            "image": "registry.connect.redhat.com/anchore/engine0:v0.5.0",
             "imagePullPolicy":"IfNotPresent",
             "internalServicesSsl":{
               "certSecretCertName":null,
