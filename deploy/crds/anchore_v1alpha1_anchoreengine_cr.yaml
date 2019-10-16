@@ -88,7 +88,7 @@ spec:
   # Global configuration shared by all anchore-engine services.
   anchoreGlobal:
     # Image used for all anchore engine deployments (excluding enterprise components).
-    image: docker.io/anchore/anchore-engine:v0.5.0
+    image: docker.io/anchore/anchore-engine:v0.5.1
     imagePullPolicy: IfNotPresent
 
     # Set this value to True to setup the chart for OpenShift deployment compatibility.
@@ -275,6 +275,12 @@ spec:
       port: 8228
       annotations: {}
       label: {}
+
+    # (Optional) Overrides for constructing API URLs.  All values are optional.
+    # external:
+    #   use_tls: true
+    #   hostname: anchore-api.example.com
+    #   port: 8443
 
     # resources:
     #  limits:
@@ -492,7 +498,7 @@ spec:
     persistence:
       resourcePolicy: nil
       size: 20Gi
-    
+
     # If running operator on OpenShift - uncomment the image, imageTag & extraEnv values below.
     # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
     # imageTag: latest

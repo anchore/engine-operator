@@ -37,6 +37,9 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
       {{ if and .Values.anchoreEnterpriseGlobal.enabled (or .Values.anchoreEnterpriseRbac.enabled .Values.anchoreEnterpriseReports.enabled) }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
@@ -93,7 +96,7 @@ spec:
         - name: run
           mountPath: /var/run/anchore
         {{- end }}
-        {{- if .Values.anchoreGlobal.internalServicesSslEnabled }}
+        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
@@ -352,7 +355,7 @@ spec:
           configMap:
             name: {{ template "anchore-engine.enterprise.fullname" . }}
         {{- end}}
-        {{- with .Values.anchoreGlobal.certStoreSecretName }}        
+        {{- with .Values.anchoreGlobal.certStoreSecretName }}
         - name: certs
           secret:
             secretName: {{ . }}

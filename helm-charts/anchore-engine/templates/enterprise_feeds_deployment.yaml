@@ -38,6 +38,9 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
       containers:
@@ -114,7 +117,7 @@ spec:
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
-          initialDelaySeconds: 300
+          initialDelaySeconds: 120
           timeoutSeconds: 10
           periodSeconds: 10
           failureThreshold: 6
