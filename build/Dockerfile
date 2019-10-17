@@ -1,4 +1,4 @@
-FROM quay.io/operator-framework/helm-operator:v0.8.1
+FROM quay.io/operator-framework/helm-operator:v0.11.0
 
 LABEL name="Anchore Engine Operator" \
       vendor="Anchore Inc." \
