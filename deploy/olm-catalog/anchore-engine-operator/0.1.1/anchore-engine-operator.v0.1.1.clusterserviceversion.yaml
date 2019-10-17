@@ -2,393 +2,395 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion":"anchore.com/v1alpha1",
+          "kind":"AnchoreEngine",
+          "metadata":{
+            "name":"example-anchoreengine"
+          },
+          "spec":{
+            "anchore-feeds-db":{
+              "externalEndpoint":null,
+              "extraEnv": [
+                {
+                  "name": "POSTGRESQL_USER",
+                  "value": "anchoreengine"
+                },
+                {
+                  "name": "POSTGRESQL_PASSWORD",
+                  "value": "anchore-postgres,123"
+                },
+                {
+                  "name": "POSTGRESQL_DATABASE",
+                  "value": "anchore-feeds"
+                },
+                {
+                  "name": "PGUSER",
+                  "value": "postgres"
+                },
+                {
+                  "name": "LD_LIBRARY_PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
+                },
+                {
+                  "name": "PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                }
+              ],
+              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
+              "imageTag": "latest",
+              "persistence":{
+                "resourcePolicy":"nil",
+                "size":"20Gi"
+              },
+              "postgresDatabase":"anchore-feeds",
+              "postgresPassword":"anchore-postgres,123",
+              "postgresUser":"anchoreengine"
+            },
+            "anchore-ui-redis":{
+              "cluster":{
+                "enabled":false
+              },
+              "externalEndpoint":null,
+              "password":"anchore-redis,123",
+              "persistence":{
+                "enabled":false
+              }
+            },
+            "anchoreAnalyzer":{
+              "affinity":{},
+              "annotations":{},
+              "concurrentTasksPerWorker":1,
+              "configFile":{
+                "retrieve_files":{
+                  "file_list":["/etc/passwd"]
+                },
+                "secret_search":{
+                  "match_params":[
+                    "MAXFILESIZE=10000",
+                    "STOREONMATCH=n"
+                  ],
+                  "regexp_match":[
+                    "AWS_ACCESS_KEY=(?i).*aws_access_key_id(*=+ *).*(?\u003c![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9]).*",
+                    "AWS_SECRET_KEY=(?i).*aws_secret_access_key(*=+ *).*(?\u003c![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=]).*",
+                    "PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+",
+                    "DOCKER_AUTH=(?i).*\"auth\": *\".+\"",
+                    "API_KEY=(?i).*api(-|_)key( *=+ *).*(?\u003c![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*"
+                  ]
+                }
+              },
+              "containerPort":8084,
+              "cycleTimers":{
+                "image_analyzer":5
+              },
+              "extraEnv":[],
+              "labels":{},
+              "layerCacheMaxGigabytes":0,
+              "nodeSelector":{},
+              "replicaCount":1,
+              "tolerations":[]
+            },
+            "anchoreApi":{
+              "affinity":{},
+              "annotations":{},
+              "extraEnv":[],
+              "labels":{},
+              "nodeSelector":{},
+              "replicaCount":1,
+              "service":{
+                "annotations":{},
+                "label":{},
+                "port":8228,
+                "type":"ClusterIP"
+              },
+              "tolerations":[]
+            },
+            "anchoreCatalog":{
+              "affinity":{},
+              "annotations":{},
+              "archive":{
+                "compression":{
+                  "enabled":true,
+                  "min_size_kbytes":100
+                },
+                "storage_driver":{
+                  "config":{},
+                  "name":"db"
+                }
+              },
+              "cycleTimers":{
+                "analyzer_queue":1,
+                "image_watcher":3600,
+                "notifications":30,
+                "policy_eval":3600,
+                "repo_watcher":60,
+                "service_watcher":15,
+                "vulnerability_scan":14400
+              },
+              "events":{
+                "notification":{
+                  "enabled":false,
+                  "level":[
+                    "error"
+                  ]
+                }
+              },
+              "extraEnv":[],
+              "labels":{},
+              "nodeSelector":{},
+              "replicaCount":1,
+              "service":{
+                "annotations":{},
+                "labels":{},
+                "port":8082,
+                "type":"ClusterIP"
+              },
+              "tolerations":[]
+            },
+            "anchoreEnterpriseFeeds":{
+              "affinity":{},
+              "annotations":{},
+              "cycleTimers":{
+                "driver_sync":7200
+              },
+              "dbConfig":{
+                "connectionPoolMaxOverflow":100,
+                "connectionPoolSize":30,
+                "ssl":false,
+                "sslMode":"verify-full",
+                "sslRootCertName":null,
+                "timeout":120
+              },
+              "enabled":true,
+              "extraEnv":[],
+              "labels":{},
+              "nodeSelector":{},
+              "service":{
+                "annotations":{},
+                "labels":{},
+                "port":8448,
+                "type":"ClusterIP"
+              },
+              "tolerations":[]
+            },
+            "anchoreEnterpriseGlobal":{
+              "enabled":false,
+              "image":"docker.io/anchore/enterprise:v0.5.0",
+              "imagePullPolicy":"IfNotPresent",
+              "imagePullSecretName":"anchore-enterprise-pullcreds",
+              "licenseSecretName":"anchore-enterprise-license"
+            },
+            "anchoreEnterpriseRbac":{
+              "enabled":true,
+              "extraEnv":[],
+              "service":{
+                "apiPort":8229,
+                "authPort":8089
+              }
+            },
+            "anchoreEnterpriseReports":{
+              "affinity":{},
+              "annotations":{},
+              "cycleTimers":{
+                "reports_data_load":600,
+                "reports_data_refresh":7200,
+                "reports_metrics":3600
+              },
+              "enableDataIngress":true,
+              "enableGraphql":true,
+              "enabled":true,
+              "extraEnv":[],
+              "labels":{},
+              "nodeSelector":{},
+              "service":{
+                "port":8558
+              },
+              "tolerations":[]
+            },
+            "anchoreEnterpriseUi":{
+              "affinity":{},
+              "annotations":{},
+              "enableProxy":false,
+              "enableSharedLogin":true,
+              "enableSsl":false,
+              "enabled":true,
+              "extraEnv":[],
+              "image":"docker.io/anchore/enterprise-ui:v0.5.0",
+              "imagePullPolicy":"IfNotPresent",
+              "labels":{},
+              "ldapsRootCaCertName":null,
+              "nodeSelector":{},
+              "policyHubUri":"http://hub.anchore.io",
+              "redisFlushdb":true,
+              "service":{
+                "annotations":{},
+                "labels":{},
+                "port":80,
+                "sessionAffinity":"ClientIP",
+                "type":"ClusterIP"
+              },
+              "tolerations":[]
+            },
+            "anchoreGlobal":{
+              "allowECRUseIAMRole":false,
+              "certStoreSecretName":null,
+              "cleanupImages":true,
+              "dbConfig":{
+                "connectionPoolMaxOverflow":100,
+                "connectionPoolSize":30,
+                "ssl":false,
+                "sslMode":"verify-full",
+                "sslRootCertName":null,
+                "timeout":120
+              },
+              "defaultAdminEmail":"example@email.com",
+              "defaultAdminPassword":"foobar",
+              "enableMetrics":false,
+              "existingSecret":null,
+              "extraEnv":[],
+              "hashedPasswords":false,
+              "image":"docker.io/anchore/anchore-engine:v0.5.1",
+              "imagePullPolicy":"IfNotPresent",
+              "internalServicesSsl":{
+                "certSecretCertName":null,
+                "certSecretKeyName":null,
+                "enabled":false,
+                "verifyCerts":false
+              },
+              "labels":{},
+              "logLevel":"INFO",
+              "oauthEnabled":false,
+              "oauthTokenExpirationSeconds":3600,
+              "openShiftDeployment":false,
+              "saml":{
+                "privateKeyName":null,
+                "publicKeyName":null,
+                "secret":null
+              },
+              "scratchVolume":{
+                "details":{
+                  "emptyDir":{}
+                },
+                "mountPath":"/analysis_scratch"
+              },
+              "serviceDir":"/anchore_service",
+              "webhooks":{
+                "general":{},
+                "ssl_verify":true,
+                "webhook_password":null,
+                "webhook_user":null
+              },
+              "webhooksEnabled":false
+            },
+            "anchorePolicyEngine":{
+              "affinity":{},
+              "annotations":{},
+              "cycleTimers":{
+                "feed_sync":14400,
+                "feed_sync_checker":3600
+              },
+              "extraEnv":[],
+              "labels":{},
+              "nodeSelector":{},
+              "replicaCount":1,
+              "service":{
+                "annotations":{},
+                "labels":{},
+                "port":8087,
+                "type":"ClusterIP"
+              },
+              "tolerations":[]
+            },
+            "anchoreSimpleQueue":{
+              "affinity":{},
+              "annotations":{},
+              "extraEnv":[],
+              "labels":{},
+              "nodeSelector":{},
+              "replicaCount":1,
+              "service":{
+                "annotations":{},
+                "labels":{},
+                "port":8083,
+                "type":"ClusterIP"
+              },
+              "tolerations":[]
+            },
+            "cloudsql":{
+              "enabled":false,
+              "image":{
+                "pullPolicy":"IfNotPresent",
+                "repository":"gcr.io/cloudsql-docker/gce-proxy",
+                "tag":1.12
+              },
+              "instance":""
+            },
+            "ingress":{
+              "annotations":{
+                "kubernetes.io/ingress.class":"nginx"
+              },
+              "apiPath":"/v1/",
+              "enabled":false,
+              "labels":{},
+              "tls":[],
+              "uiPath":"/"
+            },
+            "postgresql":{
+              "externalEndpoint":null,
+              "extraEnv": [
+                {
+                  "name": "POSTGRESQL_USER",
+                  "value": "anchoreengine"
+                },
+                {
+                  "name": "POSTGRESQL_PASSWORD",
+                  "value": "anchore-postgres,123"
+                },
+                {
+                  "name": "POSTGRESQL_DATABASE",
+                  "value": "anchore"
+                },
+                {
+                  "name": "PGUSER",
+                  "value": "postgres"
+                },
+                {
+                  "name": "LD_LIBRARY_PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
+                },
+                {
+                  "name": "PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                }
+              ],
+              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
+              "imageTag": "latest",
+              "persistence":{
+                "resourcePolicy":"nil",
+                "size":"20Gi"
+              },
+              "postgresDatabase":"anchore",
+              "postgresPassword":"anchore-postgres,123",
+              "postgresUser":"anchoreengine"
+            }
+          }
+        }
+      ]
     capabilities: Basic Install
     certified: "true"
-    containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.0-r0
-    createdAt: 2019-09-18T07:00:00Z
+    containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.1-r0
+    createdAt: 2019-10-15T07:00:00Z
     support: anchore.slack.com
     categories: "Security"
     repository: https://github.com/anchore/engine-operator
     description: Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement.
-    alm-examples: |-
-      [{
-        "apiVersion":"anchore.com/v1alpha1",
-        "kind":"AnchoreEngine",
-        "metadata":{
-          "name":"example-anchoreengine"
-        },
-        "spec":{
-          "anchore-feeds-db":{
-            "externalEndpoint":null,
-            "extraEnv": [
-              {
-                "name": "POSTGRESQL_USER",
-                "value": "anchoreengine"
-              },
-              {
-                "name": "POSTGRESQL_PASSWORD",
-                "value": "anchore-postgres,123"
-              },
-              {
-                "name": "POSTGRESQL_DATABASE",
-                "value": "anchore-feeds"
-              },
-              {
-                "name": "PGUSER",
-                "value": "postgres"
-              },
-              {
-                "name": "LD_LIBRARY_PATH",
-                "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
-              },
-              {
-                "name": "PATH",
-                "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-              }
-            ],
-            "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-            "imageTag": "latest",
-            "persistence":{
-              "resourcePolicy":"nil",
-              "size":"20Gi"
-            },
-            "postgresDatabase":"anchore-feeds",
-            "postgresPassword":"anchore-postgres,123",
-            "postgresUser":"anchoreengine"
-          },
-          "anchore-ui-redis":{
-            "cluster":{
-              "enabled":false
-            },
-            "externalEndpoint":null,
-            "password":"anchore-redis,123",
-            "persistence":{
-              "enabled":false
-            }
-          },
-          "anchoreAnalyzer":{
-            "affinity":{},
-            "annotations":{},
-            "concurrentTasksPerWorker":1,
-            "configFile":{
-              "retrieve_files":{
-                "file_list":["/etc/passwd"]
-              },
-              "secret_search":{
-                "match_params":[
-                  "MAXFILESIZE=10000",
-                  "STOREONMATCH=n"
-                ],
-                "regexp_match":[
-                  "AWS_ACCESS_KEY=(?i).*aws_access_key_id(*=+ *).*(?\u003c![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9]).*",
-                  "AWS_SECRET_KEY=(?i).*aws_secret_access_key(*=+ *).*(?\u003c![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=]).*",
-                  "PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+",
-                  "DOCKER_AUTH=(?i).*\"auth\": *\".+\"",
-                  "API_KEY=(?i).*api(-|_)key( *=+ *).*(?\u003c![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*"
-                ]
-              }
-            },
-            "containerPort":8084,
-            "cycleTimers":{
-              "image_analyzer":5
-            },
-            "extraEnv":[],
-            "labels":{},
-            "layerCacheMaxGigabytes":0,
-            "nodeSelector":{},
-            "replicaCount":1,
-            "tolerations":[]
-          },
-          "anchoreApi":{
-            "affinity":{},
-            "annotations":{},
-            "extraEnv":[],
-            "labels":{},
-            "nodeSelector":{},
-            "replicaCount":1,
-            "service":{
-              "annotations":{},
-              "label":{},
-              "port":8228,
-              "type":"ClusterIP"
-            },
-            "tolerations":[]
-          },
-          "anchoreCatalog":{
-            "affinity":{},
-            "annotations":{},
-            "archive":{
-              "compression":{
-                "enabled":true,
-                "min_size_kbytes":100
-              },
-              "storage_driver":{
-                "config":{},
-                "name":"db"
-              }
-            },
-            "cycleTimers":{
-              "analyzer_queue":1,
-              "image_watcher":3600,
-              "notifications":30,
-              "policy_eval":3600,
-              "repo_watcher":60,
-              "service_watcher":15,
-              "vulnerability_scan":14400
-            },
-            "events":{
-              "notification":{
-                "enabled":false,
-                "level":[
-                  "error"
-                ]
-              }
-            },
-            "extraEnv":[],
-            "labels":{},
-            "nodeSelector":{},
-            "replicaCount":1,
-            "service":{
-              "annotations":{},
-              "labels":{},
-              "port":8082,
-              "type":"ClusterIP"
-            },
-            "tolerations":[]
-          },
-          "anchoreEnterpriseFeeds":{
-            "affinity":{},
-            "annotations":{},
-            "cycleTimers":{
-              "driver_sync":7200
-            },
-            "dbConfig":{
-              "connectionPoolMaxOverflow":100,
-              "connectionPoolSize":30,
-              "ssl":false,
-              "sslMode":"verify-full",
-              "sslRootCertName":null,
-              "timeout":120
-            },
-            "enabled":true,
-            "extraEnv":[],
-            "labels":{},
-            "nodeSelector":{},
-            "service":{
-              "annotations":{},
-              "labels":{},
-              "port":8448,
-              "type":"ClusterIP"
-            },
-            "tolerations":[]
-          },
-          "anchoreEnterpriseGlobal":{
-            "enabled":false,
-            "image":"docker.io/anchore/enterprise:v0.5.0",
-            "imagePullPolicy":"IfNotPresent",
-            "imagePullSecretName":"anchore-enterprise-pullcreds",
-            "licenseSecretName":"anchore-enterprise-license"
-          },
-          "anchoreEnterpriseRbac":{
-            "enabled":true,
-            "extraEnv":[],
-            "service":{
-              "apiPort":8229,
-              "authPort":8089
-            }
-          },
-          "anchoreEnterpriseReports":{
-            "affinity":{},
-            "annotations":{},
-            "cycleTimers":{
-              "reports_data_load":600,
-              "reports_data_refresh":7200,
-              "reports_metrics":3600
-            },
-            "enableDataIngress":true,
-            "enableGraphql":true,
-            "enabled":true,
-            "extraEnv":[],
-            "labels":{},
-            "nodeSelector":{},
-            "service":{
-              "port":8558
-            },
-            "tolerations":[]
-          },
-          "anchoreEnterpriseUi":{
-            "affinity":{},
-            "annotations":{},
-            "enableProxy":false,
-            "enableSharedLogin":true,
-            "enableSsl":false,
-            "enabled":true,
-            "extraEnv":[],
-            "image":"docker.io/anchore/enterprise-ui:v0.5.0",
-            "imagePullPolicy":"IfNotPresent",
-            "labels":{},
-            "ldapsRootCaCertName":null,
-            "nodeSelector":{},
-            "policyHubUri":"http://hub.anchore.io",
-            "redisFlushdb":true,
-            "service":{
-              "annotations":{},
-              "labels":{},
-              "port":80,
-              "sessionAffinity":"ClientIP",
-              "type":"ClusterIP"
-            },
-            "tolerations":[]
-          },
-          "anchoreGlobal":{
-            "allowECRUseIAMRole":false,
-            "certStoreSecretName":null,
-            "cleanupImages":true,
-            "dbConfig":{
-              "connectionPoolMaxOverflow":100,
-              "connectionPoolSize":30,
-              "ssl":false,
-              "sslMode":"verify-full",
-              "sslRootCertName":null,
-              "timeout":120
-            },
-            "defaultAdminEmail":"example@email.com",
-            "defaultAdminPassword":"foobar",
-            "enableMetrics":false,
-            "existingSecret":null,
-            "extraEnv":[],
-            "hashedPasswords":false,
-            "image": "registry.connect.redhat.com/anchore/engine0:v0.5.0",
-            "imagePullPolicy":"IfNotPresent",
-            "internalServicesSsl":{
-              "certSecretCertName":null,
-              "certSecretKeyName":null,
-              "enabled":false,
-              "verifyCerts":false
-            },
-            "labels":{},
-            "logLevel":"INFO",
-            "oauthEnabled":false,
-            "oauthTokenExpirationSeconds":3600,
-            "openShiftDeployment":true,
-            "saml":{
-              "privateKeyName":null,
-              "publicKeyName":null,
-              "secret":null
-            },
-            "scratchVolume":{
-              "details":{
-                "emptyDir":{}
-              },
-              "mountPath":"/analysis_scratch"
-            },
-            "serviceDir":"/anchore_service",
-            "webhooks":{
-              "general":{},
-              "ssl_verify":true,
-              "webhook_password":null,
-              "webhook_user":null
-            },
-            "webhooksEnabled":false
-          },
-          "anchorePolicyEngine":{
-            "affinity":{},
-            "annotations":{},
-            "cycleTimers":{
-              "feed_sync":14400,
-              "feed_sync_checker":3600
-            },
-            "extraEnv":[],
-            "labels":{},
-            "nodeSelector":{},
-            "replicaCount":1,
-            "service":{
-              "annotations":{},
-              "labels":{},
-              "port":8087,
-              "type":"ClusterIP"
-            },
-            "tolerations":[]
-          },
-          "anchoreSimpleQueue":{
-            "affinity":{},
-            "annotations":{},
-            "extraEnv":[],
-            "labels":{},
-            "nodeSelector":{},
-            "replicaCount":1,
-            "service":{
-              "annotations":{},
-              "labels":{},
-              "port":8083,
-              "type":"ClusterIP"
-            },
-            "tolerations":[]
-          },
-          "cloudsql":{
-            "enabled":false,
-            "image":{
-              "pullPolicy":"IfNotPresent",
-              "repository":"gcr.io/cloudsql-docker/gce-proxy",
-              "tag":1.12
-            },
-            "instance":""
-          },
-          "ingress":{
-            "annotations":{
-              "kubernetes.io/ingress.class":"nginx"
-            },
-            "apiPath":"/v1/",
-            "enabled":false,
-            "labels":{},
-            "tls":[],
-            "uiPath":"/"
-          },
-          "postgresql":{
-            "externalEndpoint":null,
-            "extraEnv": [
-              {
-                "name": "POSTGRESQL_USER",
-                "value": "anchoreengine"
-              },
-              {
-                "name": "POSTGRESQL_PASSWORD",
-                "value": "anchore-postgres,123"
-              },
-              {
-                "name": "POSTGRESQL_DATABASE",
-                "value": "anchore"
-              },
-              {
-                "name": "PGUSER",
-                "value": "postgres"
-              },
-              {
-                "name": "LD_LIBRARY_PATH",
-                "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
-              },
-              {
-                "name": "PATH",
-                "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-              }
-            ],
-            "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-            "imageTag": "latest",
-            "persistence":{
-              "resourcePolicy":"nil",
-              "size":"20Gi"
-            },
-            "postgresDatabase":"anchore",
-            "postgresPassword":"anchore-postgres,123",
-            "postgresUser":"anchoreengine"
-          }
-        }
-      }]
-  name: anchore-engine-operator.v0.1.0
+  name: anchore-engine-operator.v0.1.1
   namespace: anchore
 spec:
   apiservicedefinitions: {}
-  customresourcedefinitions:
+  customresourcedefinitions: 
     owned:
     - kind: AnchoreEngine
       name: anchoreengines.anchore.com
@@ -423,6 +425,8 @@ spec:
     url: https://www.anchore.com
   - name: Anchore Engine
     url: https://github.com/anchore/anchore-engine
+  description: Placeholder description
+  displayName: Anchore Engine Operator
   install:
     spec:
       deployments:
@@ -450,7 +454,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.0-r0
+                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.1-r0
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
@@ -518,4 +522,4 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
-  version: 0.1.0
+  version: 0.1.1
