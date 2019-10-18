@@ -13,34 +13,7 @@ metadata:
           "spec":{
             "anchore-feeds-db":{
               "externalEndpoint":null,
-              "extraEnv": [
-                {
-                  "name": "POSTGRESQL_USER",
-                  "value": "anchoreengine"
-                },
-                {
-                  "name": "POSTGRESQL_PASSWORD",
-                  "value": "anchore-postgres,123"
-                },
-                {
-                  "name": "POSTGRESQL_DATABASE",
-                  "value": "anchore-feeds"
-                },
-                {
-                  "name": "PGUSER",
-                  "value": "postgres"
-                },
-                {
-                  "name": "LD_LIBRARY_PATH",
-                  "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
-                },
-                {
-                  "name": "PATH",
-                  "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-                }
-              ],
-              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-              "imageTag": "latest",
+              "extraEnv": [],
               "persistence":{
                 "resourcePolicy":"nil",
                 "size":"20Gi"
@@ -263,7 +236,7 @@ metadata:
               "logLevel":"INFO",
               "oauthEnabled":false,
               "oauthTokenExpirationSeconds":3600,
-              "openShiftDeployment":true,
+              "openShiftDeployment":false,
               "saml":{
                 "privateKeyName":null,
                 "publicKeyName":null,
@@ -339,34 +312,7 @@ metadata:
             },
             "postgresql":{
               "externalEndpoint":null,
-              "extraEnv": [
-                {
-                  "name": "POSTGRESQL_USER",
-                  "value": "anchoreengine"
-                },
-                {
-                  "name": "POSTGRESQL_PASSWORD",
-                  "value": "anchore-postgres,123"
-                },
-                {
-                  "name": "POSTGRESQL_DATABASE",
-                  "value": "anchore"
-                },
-                {
-                  "name": "PGUSER",
-                  "value": "postgres"
-                },
-                {
-                  "name": "LD_LIBRARY_PATH",
-                  "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
-                },
-                {
-                  "name": "PATH",
-                  "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-                }
-              ],
-              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-              "imageTag": "latest",
+              "extraEnv": [],
               "persistence":{
                 "resourcePolicy":"nil",
                 "size":"20Gi"
@@ -380,7 +326,7 @@ metadata:
       ]
     capabilities: Basic Install
     certified: "true"
-    containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.1-r0
+    containerImage: docker.io/anchore/engine-operator:v0.1.1
     createdAt: 2019-10-15T07:00:00Z
     support: anchore.slack.com
     categories: "Security"
@@ -458,7 +404,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.1-r0
+                image: docker.io/anchore/engine-operator:v0.1.1
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
