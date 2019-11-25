@@ -14,8 +14,6 @@ metadata:
             "anchore-feeds-db":{
               "externalEndpoint":null,
               "extraEnv": [],
-              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-              "imageTag": "latest",
               "persistence":{
                 "resourcePolicy":"nil",
                 "size":"20Gi"
@@ -316,8 +314,6 @@ metadata:
             "postgresql":{
               "externalEndpoint":null,
               "extraEnv": [],
-              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-              "imageTag": "latest",
               "persistence":{
                 "resourcePolicy":"nil",
                 "size":"20Gi"
@@ -331,7 +327,7 @@ metadata:
       ]
     capabilities: Basic Install
     certified: "true"
-    containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.2-r0
+    containerImage: docker.io/anchore/engine-operator:v0.1.2
     createdAt: 2019-11-18T07:00:00Z
     support: anchore.slack.com
     categories: "Security"
@@ -409,7 +405,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.2-r0
+                image: docker.io/anchore/engine-operator:v0.1.2
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
