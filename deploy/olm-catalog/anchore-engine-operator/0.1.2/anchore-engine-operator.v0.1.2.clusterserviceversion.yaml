@@ -527,5 +527,4 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
-  replaces: anchore-engine-operator.v0.1.1
   version: 0.1.2
