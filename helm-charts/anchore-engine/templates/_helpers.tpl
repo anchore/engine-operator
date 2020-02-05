@@ -21,7 +21,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.analyzer.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "analyzer"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "analyzer"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -30,7 +30,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.catalog.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "catalog"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "catalog"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -39,7 +39,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.api.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "api"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "api"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -48,7 +48,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.policy-engine.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "policy"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "policy"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -57,7 +57,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.simplequeue.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "simplequeue"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "simplequeue"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -66,7 +66,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.enterprise.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "enterprise"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "enterprise"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -75,7 +75,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.enterprise-ui.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "enterprise-ui"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "enterprise-ui"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -84,7 +84,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.enterprise-feeds.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "enterprise-feeds"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "enterprise-feeds"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -93,7 +93,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.enterprise-reports.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "enterprise-reports"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "enterprise-reports"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -102,7 +102,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-engine.enterprise-notifications.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s-%s" .Release.Name $name "enterprise-notifications"| trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "enterprise-notifications"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
