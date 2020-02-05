@@ -44,7 +44,7 @@ See [OLM - building your csv](https://github.com/operator-framework/operator-lif
   * This will create the `deploy/olm-catalog/<version>` directory and a csv resource spec file. 
 
 ```
-operator-sdk olm-catalog gen-csv --csv-version <version>
+operator-sdk generate csv --csv-version <new_version> --from-version <previous_version>
 ```
 * Copy `deploy/crds/anchore_v1alpha1_anchoreengine_crd.yaml` to the `deploy/olm-catalog/<version>/` directory.
 * Create `deploy/olm-catalog/<version>/anchore-engine.package.yaml` with the updated version.
