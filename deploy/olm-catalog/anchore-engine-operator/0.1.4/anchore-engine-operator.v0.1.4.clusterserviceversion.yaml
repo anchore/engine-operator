@@ -369,7 +369,7 @@ metadata:
                 },
                 {
                   "name": "POSTGRESQL_DATABASE",
-                  "value": "anchore-feeds"
+                  "value": "anchore"
                 },
                 {
                   "name": "PGUSER",
@@ -547,5 +547,4 @@ spec:
   maturity: alpha
   provider:
     name: Anchore Inc.
-  replaces: anchore-engine-operator.v0.1.3
   version: 0.1.4
