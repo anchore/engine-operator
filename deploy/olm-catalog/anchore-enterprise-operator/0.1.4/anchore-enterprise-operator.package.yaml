@@ -1,5 +1,0 @@
-channels:
-- currentCSV: anchore-enterprise-operator.v0.1.4
-  name: alpha
-defaultChannel: alpha
-packageName: anchore-enterprise

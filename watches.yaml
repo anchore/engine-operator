@@ -3,11 +3,3 @@
   group: anchore.com
   kind: AnchoreEngine
   chart: /opt/helm/helm-charts/anchore-engine
-  overrideValues:
-    anchoreGlobal.image: $RELATED_IMAGE_ANCHORE_ENGINE
-    anchoreEnterpriseGlobal.engineImage: $RELATED_IMAGE_ANCHORE_ENGINE
-    anchoreEnterpriseGlobal.image: $RELATED_IMAGE_ANCHORE_ENTERPRISE
-    anchoreEnterpriseUi.image: $RELATED_IMAGE_ANCHORE_UI
-    postgresql.image: $RELATED_IMAGE_POSTGRESQL
-    anchore-ui-redis.image.name: $RELATED_IMAGE_REDIS
-    anchore-feeds-db.image: $RELATED_IMAGE_FEEDS_DB

@@ -11,29 +11,6 @@ metadata:
             "name": "example-anchoreengine"
           },
           "spec": {
-            "anchore-feeds-db": {
-              "externalEndpoint": null,
-              "extraEnv": [],
-              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
-              "imageTag": "latest",
-              "persistence": {
-                "resourcePolicy": "nil",
-                "size": "20Gi"
-              },
-              "postgresDatabase": "anchore-feeds",
-              "postgresPassword": "anchore-postgres,123",
-              "postgresUser": "anchoreengine"
-            },
-            "anchore-ui-redis": {
-              "cluster": {
-                "enabled": false
-              },
-              "externalEndpoint": null,
-              "password": "anchore-redis,123",
-              "persistence": {
-                "enabled": false
-              }
-            },
             "anchoreAnalyzer": {
               "affinity": {},
               "annotations": {},
@@ -126,105 +103,6 @@ metadata:
               },
               "tolerations": []
             },
-            "anchoreEnterpriseFeeds": {
-              "affinity": {},
-              "annotations": {},
-              "cycleTimers": {
-                "driver_sync": 7200
-              },
-              "dbConfig": {
-                "connectionPoolMaxOverflow": 100,
-                "connectionPoolSize": 30,
-                "ssl": false,
-                "sslMode": "verify-full",
-                "sslRootCertName": null,
-                "timeout": 120
-              },
-              "enabled": true,
-              "extraEnv": [],
-              "labels": {},
-              "nodeSelector": {},
-              "service": {
-                "annotations": {},
-                "labels": {},
-                "port": 8448,
-                "type": "ClusterIP"
-              },
-              "tolerations": []
-            },
-            "anchoreEnterpriseGlobal": {
-              "enabled": false,
-              "image": "docker.io/anchore/enterprise:v0.6.1",
-              "imagePullPolicy": "IfNotPresent",
-              "imagePullSecretName": "anchore-enterprise-pullcreds",
-              "licenseSecretName": "anchore-enterprise-license"
-            },
-            "anchoreEnterpriseNotifications": {
-              "affinity": {},
-              "annotations": {},
-              "cycleTimers": {
-                "notifications": 30
-              },
-              "enabled": true,
-              "extraEnv": [],
-              "labels": {},
-              "nodeSelector": {},
-              "service": {
-                "port": 8668
-              },
-              "tolerations": []
-            },
-            "anchoreEnterpriseRbac": {
-              "enabled": true,
-              "extraEnv": [],
-              "service": {
-                "apiPort": 8229,
-                "authPort": 8089
-              }
-            },
-            "anchoreEnterpriseReports": {
-              "affinity": {},
-              "annotations": {},
-              "cycleTimers": {
-                "reports_data_load": 600,
-                "reports_data_refresh": 7200,
-                "reports_metrics": 3600
-              },
-              "enableDataIngress": true,
-              "enableGraphql": true,
-              "enabled": true,
-              "extraEnv": [],
-              "labels": {},
-              "nodeSelector": {},
-              "service": {
-                "port": 8558
-              },
-              "tolerations": []
-            },
-            "anchoreEnterpriseUi": {
-              "affinity": {},
-              "annotations": {},
-              "enableProxy": false,
-              "enableSharedLogin": true,
-              "enableSsl": false,
-              "enabled": true,
-              "extraEnv": [],
-              "image": "docker.io/anchore/enterprise-ui:v0.6.1",
-              "imagePullPolicy": "IfNotPresent",
-              "labels": {},
-              "ldapsRootCaCertName": null,
-              "nodeSelector": {},
-              "policyHubUri": "http://hub.anchore.io",
-              "redisFlushdb": true,
-              "service": {
-                "annotations": {},
-                "labels": {},
-                "port": 80,
-                "sessionAffinity": "ClientIP",
-                "type": "ClusterIP"
-              },
-              "tolerations": []
-            },
             "anchoreGlobal": {
               "allowECRUseIAMRole": false,
               "certStoreSecretName": null,
@@ -243,9 +121,10 @@ metadata:
               "existingSecret": null,
               "extraEnv": [],
               "hashedPasswords": false,
-              "image": "docker.io/anchore/anchore-engine:v0.6.1",
+              "image": "docker.io/anchore/anchore-engine:v0.7.0",
               "imageAnalyzeTimeoutSeconds": 36000,
               "imagePullPolicy": "IfNotPresent",
+              "imagePullSecretName": null,
               "internalServicesSsl": {
                 "certSecretCertName": null,
                 "certSecretKeyName": null,
@@ -257,7 +136,7 @@ metadata:
               "metricsAuthDisabled": false,
               "oauthEnabled": false,
               "oauthTokenExpirationSeconds": 3600,
-              "openShiftDeployment": false,
+              "openShiftDeployment": true,
               "saml": {
                 "privateKeyName": null,
                 "publicKeyName": null,
@@ -312,15 +191,6 @@ metadata:
               },
               "tolerations": []
             },
-            "cloudsql": {
-              "enabled": false,
-              "image": {
-                "pullPolicy": "IfNotPresent",
-                "repository": "gcr.io/cloudsql-docker/gce-proxy",
-                "tag": 1.12
-              },
-              "instance": ""
-            },
             "ingress": {
               "annotations": {
                 "kubernetes.io/ingress.class": "nginx"
@@ -333,7 +203,32 @@ metadata:
             },
             "postgresql": {
               "externalEndpoint": null,
-              "extraEnv": [],
+              "extraEnv": [
+                {
+                  "name": "POSTGRESQL_USER",
+                  "value": "anchoreengine"
+                },
+                {
+                  "name": "POSTGRESQL_PASSWORD",
+                  "value": "anchore-postgres,123"
+                },
+                {
+                  "name": "POSTGRESQL_DATABASE",
+                  "value": "anchore"
+                },
+                {
+                  "name": "PGUSER",
+                  "value": "postgres"
+                },
+                {
+                  "name": "LD_LIBRARY_PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
+                },
+                {
+                  "name": "PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                }
+              ],
               "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
               "imageTag": "latest",
               "persistence": {
@@ -350,13 +245,13 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "true"
-    containerImage: docker.io/anchore/engine-operator:v0.1.4
+    containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.5-r0
     createdAt: "2019-12-13T07:00:00Z"
     description: Anchore Engine - container image scanning service for policy-based
       security, best-practice and compliance enforcement.
     repository: https://github.com/anchore/engine-operator
     support: anchore.slack.com
-  name: anchore-engine-operator.v0.1.4
+  name: anchore-engine-operator.v0.1.5
   namespace: anchore
 spec:
   apiservicedefinitions: {}
@@ -408,7 +303,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: docker.io/anchore/engine-operator:v0.1.4
+                image: docker.io/anchore/engine-operator:v0.1.5
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
@@ -497,5 +392,4 @@ spec:
   maturity: alpha
   provider:
     name: Anchore Inc.
-  replaces: anchore-engine-operator.v0.1.3
-  version: 0.1.4
+  version: 0.1.5
