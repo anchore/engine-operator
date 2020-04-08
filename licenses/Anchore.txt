@@ -1,0 +1,164 @@
+ANCHORE END USER LICENSE AGREEMENT
+
+PLEASE READ THIS ANCHORE END USER LICENSE AGREEMENT CAREFULLY BEFORE
+YOU AGREE TO THESE TERMS. IF YOU ARE ACTING ON BEHALF OF AN ENTITY,
+THEN YOU REPRESENT THAT YOU HAVE THE AUTHORITY TO ENTER INTO THIS
+AGREEMENT ON BEHALF OF THAT ENTITY. IF YOU DO NOT AGREE TO THESE
+TERMS, YOU SHOULD NOT AGREE TO THE TERMS OF THIS AGREEMENT OR USE THE
+SOFTWARE.
+
+This Anchore End User License Agreement (Agreement) is made by
+Anchore, Inc. (Anchore) with its principal place of business at 800
+Presidio Ave., Suite B, Santa Barbara, CA 93101 and you
+(Customer). The effective date (Effective Date) of this Agreement is
+the date Customer agrees to these terms or uses the Software.
+(Software) means the software and accompanying documentation provided
+to you by Anchore. This Agreement applies to your use of the Software
+but it will be superseded by any signed agreement between you and
+Anchore concerning the Software.
+
+1.  LICENSE
+
+1.1 License Grant. Subject to the terms and conditions of this
+Agreement, Anchore hereby grants to Customer, during the term of this
+Agreement, a limited, non-exclusive, non-transferable right and
+license to use the Software for Customer's internal business use
+without the right to grant or authorize sublicenses or to further
+distribute the Software. Customer may make one additional copy of the
+Software for non-production, cold backup or archival purposes.
+
+1.2 License Restrictions.  Except as otherwise expressly permitted in
+this Agreement, Customer shall not itself, or through any parent,
+subsidiary, affiliate, agent or other third party: (a) sell, lease,
+license, distribute, sublicense or otherwise transfer in whole or in
+part, the Software to a third party; (b) decompile, disassemble,
+translate, reverse engineer or otherwise attempt to derive source code
+from the Software; (c) allow access or permit use of the Software by
+any third party except authorized third-party contractors solely to
+provide services to Customer; provided that Customer shall be liable
+for all acts and omissions of such authorized third-party contractors;
+(d) circumvent the license keys embedded within the Software; (e)
+modify or create derivative works based upon the Software; (f)
+disclose the results of any benchmark test of the Software to any
+third party; or (g) change any proprietary rights notices which appear
+in the Software.  1.3 Support. Anchore does not provide any support
+services for the Software under this Agreement. You may separately
+purchase Anchore support services. These support services are subject
+to Anchore's then-current support terms and conditions.  1.4
+Ownership. Anchore and its licensors shall retain all intellectual
+property and proprietary rights in the Software and related works,
+including but not limited to any derivative work of the foregoing.
+
+2. CONFIDENTIALITY. For a period of five (5) years from the date of
+disclosure of the applicable Confidential Information, Customer will
+(a) hold the Confidential Information in trust and confidence and
+avoid the disclosure or release thereof to any other person or entity
+by using the same degree of care as it uses to avoid unauthorized use,
+disclosure, or dissemination of its own Confidential Information of a
+similar nature, but not less than reasonable care, and (b) not use the
+Confidential Information for any purpose whatsoever except as
+expressly contemplated under this Agreement; provided that, to the
+extent the Confidential Information constitutes a trade secret under
+law, Customer agrees to protect such information for so long as it
+qualifies as a trade secret under applicable law. Customer will
+disclose the Confidential Information only to those of its employees
+and contractors having a need to know such Confidential Information
+and will ensure that such employees and contractors comply with the
+provisions of this Section. The obligations of Customer under this
+Section will not apply to information that Customer can demonstrate
+(i) was in its possession at the time of disclosure and without
+restriction as to confidentiality, (ii) at the time of disclosure is
+generally available to the public or after disclosure becomes
+generally available to the public through no breach of agreement or
+other wrongful act by Customer, or (iii) has been received from a
+third party without restriction on disclosure and without breach of
+this Section. (Confidential Information) means any and all information
+or proprietary materials (in every form and media) not generally known
+in the relevant trade or industry and which has been or is hereafter
+disclosed or made available by Anchore to Customer in connection with
+this Agreement.
+
+3. DISCLAIMER. THE SOFTWARE IS PROVIDED TO CUSTOMER AS-IS AND ANCHORE
+AND ITS SUPPLIERS MAKE NO WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING, BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, INTEGRATION,
+NON-INFRINGEMENT, TITLE, PERFORMANCE, AND ACCURACY AND ANY IMPLIED
+WARRANTIES ARISING FROM STATUTE, COURSE OF DEALING, COURSE OF
+PERFORMANCE, OR USAGE OF TRADE. ANCHORE AND ITS LICENSORS DO NOT
+WARRANT THAT: (A) THE SOFTWARE WILL FUNCTION UNINTERRUPTED, OR BE
+SECURE OR AVAILABLE AT ANY PARTICULAR TIME OR LOCATION; (B) ANY ERRORS
+OR DEFECTS IN THE SOFTWARE WILL BE CORRECTED; (C) THE SOFTWARE IS FREE
+OF VIRUSES OR OTHER HARMFUL COMPONENTS; OR (D) THE RESULTS OF USING
+THE SOFTWARE WILL MEET CUSTOMER'S REQUIREMENTS. WITHOUT LIMITING THE
+GENERALITY OF THE FOREGOING DISCLAIMER, CUSTOMER ACKNOWLEDGES THAT THE
+SOFTWARE IS NOT INTENDED FOR USE IN HAZARDOUS ENVIRONMENTS THAT
+REQUIRE FAIL-SAFE PERFORMANCE, SUCH AS NUCLEAR OR CHEMICAL FACILITIES,
+AIRCRAFT OR OTHER MODES OF HUMAN MASS TRANSPORTATION, LIFE SUPPORT
+SYSTEMS, IMPLANTABLE MEDICAL EQUIPMENT OR WEAPONS SYSTEMS.
+
+4. TERM AND TERMINATION. The term of this Agreement shall commence on
+the Effective Date and continue until terminated as set forth in this
+Agreement. Unless otherwise agreed by the parties in writing, each
+party may terminate this Agreement upon notice to the other
+party. Further, each party may terminate this Agreement upon notice to
+other party in the event the other party breaches a material term of
+this Agreement and does not cure such breach within thirty (30) days
+of receipt of notice to do so. Sections 1.2, 1.4 and 2 - 6 shall
+survive the termination of this Agreement. Within thirty (30) days of
+the effective date of termination of this Agreement, Customer shall
+destroy all copies of the Software and any related materials and
+certify such destruction to Anchore. During the term of this Agreement
+and for one (1) year following termination (but no more than once in a
+calendar year), Anchore and its auditors may inspect Customer's
+records relating to its reproduction and use of the Software for the
+purposes of verifying Customer's compliance with this Agreement.
+Customer shall cooperate fully with Anchore and its auditors in
+conducting audits and provide reasonable assistance.  If an
+unauthorized use of the Software or other intellectual property of
+Anchore is discovered, Customer shall promptly cease all use of the
+Software and other intellectual property of Anchore and reimburse
+Anchore for the cost of the audit.
+
+5. LIMITATION OF LIABILITY. IN NO EVENT WILL ANCHORE OR ITS SUPPLIERS
+BE LIABLE UNDER THIS AGREEMENT FOR ANY INDIRECT, RELIANCE, PUNITIVE,
+CONSEQUENTIAL, SPECIAL, EXEMPLARY, OR INCIDENTAL DAMAGES OF ANY KIND
+AND HOWEVER CAUSED. IN NO EVENT WILL ANCHORE'S CUMULATIVE LIABILITY
+FOR ANY CLAIM ARISING IN CONNECTION WITH THIS AGREEMENT EXCEED THE
+AMOUNT OF ONE HUNDRED DOLLARS (US$100). IN NO EVENT WILL ANCHORE'S
+SUPPLIERS HAVE ANY LIABILITY FOR ANY CLAIM ARISING IN CONNECTION WITH
+THIS AGREEMENT. THE PROVISIONS OF THIS SECTION 5 ALLOCATE RISKS UNDER
+THIS AGREEMENT BETWEEN CUSTOMER, ANCHORE AND ANCHORE' SUPPLIERS. THE
+FOREGOING LIMITATIONS, EXCLUSIONS AND DISCLAIMERS APPLY TO THE MAXIMUM
+EXTENT PERMITTED BY APPLICABLE LAW, EVEN IF ANY REMEDY FAILS IN ITS
+ESSENTIAL PURPOSE.
+
+6. GENERAL.  This Agreement constitutes the entire agreement between
+the parties concerning the subject matter of this Agreement. No
+amendment, modification or waiver of any provision of this Agreement
+shall be effective unless in writing and signed by both parties. No
+purchase orders shall be issued under this Agreement and the terms of
+any purchase orders issued under this Agreement in violation of this
+provision are hereby rejected by the parties. This Agreement
+supersedes all prior or contemporaneous discussions, proposals and
+agreements between the parties relating to the subject matter of this
+Agreement. If any provision of this Agreement is held to be invalid or
+unenforceable, the remaining portions shall remain in full force and
+effect and such provision shall be enforced to the maximum extent
+possible so as to effect the intent of the parties and shall be
+reformed to the extent necessary to make such provision valid and
+enforceable. No waiver of rights by either party may be implied from
+any actions or failures to enforce rights under this
+Agreement. Neither party shall be liable to the other for any delay or
+failure to perform due to causes beyond its reasonable control. Unless
+otherwise specifically stated, the terms of this Agreement are
+intended to be and are solely for the benefit of Anchore and Customer
+and do not create any right in favor of any third party. The laws of
+the State of New York will govern this Agreement. The provisions of
+the Uniform Computerized Information Transaction Act and United
+Nations Convention on Contracts for the International Sale of Goods
+shall not apply to this Agreement. Any litigation related to this
+Agreement shall be brought in the state or federal courts located in
+New York, New York, and only in those courts and each party
+irrevocably waives any objections to such venue. All notices must be
+in writing and shall be effective three (3) days after the date sent
+to the other party's headquarters, Attention Chief Financial Officer.
