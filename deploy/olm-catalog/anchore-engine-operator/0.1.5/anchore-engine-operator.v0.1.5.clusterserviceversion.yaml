@@ -303,7 +303,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: anchore-engine-operator
-                image: docker.io/anchore/engine-operator:v0.1.5
+                image: registry.connect.redhat.com/anchore/engine-operator:v0.1.5-r0
                 imagePullPolicy: Always
                 name: anchore-engine-operator
                 resources: {}
