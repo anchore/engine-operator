@@ -1,9 +1,9 @@
-FROM quay.io/operator-framework/helm-operator:v0.16.0
+FROM quay.io/operator-framework/helm-operator:v0.17.0
 
 LABEL name="Anchore Engine Operator" \
       vendor="Anchore Inc." \
       maintainer="dev@anchore.com" \
-      version="v0.1.5" \
+      version="v0.1.6" \
       release="0" \
       summary="Anchore Engine Helm based operator." \
       description="Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement."
