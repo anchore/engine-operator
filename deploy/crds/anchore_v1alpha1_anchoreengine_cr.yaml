@@ -24,7 +24,7 @@ spec:
       resourcePolicy: nil
       size: 20Gi
 
-    # If running operator on OpenShift - uncomment the image, imageTag & extraEnv values below.
+    # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
     # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
     # imageTag: latest
     # extraEnv:
@@ -79,7 +79,7 @@ spec:
   # Global configuration shared by all anchore-engine services.
   anchoreGlobal:
     # Image used for all anchore engine deployments (excluding enterprise components).
-    image: docker.io/anchore/anchore-engine:v0.7.0
+    image: docker.io/anchore/anchore-engine:v0.7.1
     imagePullPolicy: IfNotPresent
     # Set image pull secret name if using an anchore-engine image from a private registry
     imagePullSecretName:
@@ -246,11 +246,11 @@ spec:
 
     # resources:
     #  limits:
-    #    cpu: 100m
-    #    memory: 8Gi
+    #    cpu: 1
+    #    memory: 4G
     #  requests:
-    #    cpu: 100m
-    #    memory: 3Gi
+    #    cpu: 1
+    #    memory: 1G
 
     labels: {}
     annotations: {}
@@ -283,11 +283,11 @@ spec:
 
     # resources:
     #  limits:
-    #    cpu: 100m
-    #    memory: 6Gi
+    #    cpu: 1
+    #    memory: 4G
     #  requests:
     #    cpu: 100m
-    #    memory: 4Gi
+    #    memory: 1G
 
     labels: {}
     annotations: {}
@@ -386,11 +386,11 @@ spec:
 
     # resources:
     #  limits:
-    #    cpu: 100m
-    #    memory: 8Gi
+    #    cpu: 1
+    #    memory: 2G
     #  requests:
     #    cpu: 100m
-    #    memory: 3Gi
+    #    memory: 500M
 
     labels: {}
     annotations: {}
@@ -423,11 +423,11 @@ spec:
 
     # resources:
     #  limits:
-    #    cpu: 100m
-    #    memory: 8Gi
+    #    cpu: 1
+    #    memory: 4G
     #  requests:
     #    cpu: 100m
-    #    memory: 3Gi
+    #    memory: 1G
 
     labels: {}
     annotations: {}
@@ -453,11 +453,11 @@ spec:
 
     # resources:
     #  limits:
-    #    cpu: 100m
-    #    memory: 3Gi
+    #    cpu: 1
+    #    memory: 1G
     #  requests:
     #    cpu: 100m
-    #    memory: 2Gi
+    #    memory: 256M
 
     labels: {}
     annotations: {}
