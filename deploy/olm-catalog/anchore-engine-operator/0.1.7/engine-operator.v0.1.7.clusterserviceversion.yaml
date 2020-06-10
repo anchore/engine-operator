@@ -243,7 +243,7 @@ metadata:
         }
       ]
     capabilities: Basic Install
-  categories: Security
+    categories: Security
     certified: "true"
     containerImage: registry.connect.redhat.com/anchore/engine-operator:v0.1.6-r0
     createdAt: "2019-12-13T07:00:00Z"
