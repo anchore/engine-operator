@@ -136,7 +136,7 @@ metadata:
               "metricsAuthDisabled": false,
               "oauthEnabled": false,
               "oauthTokenExpirationSeconds": 3600,
-              "openShiftDeployment": false,
+              "openShiftDeployment": true,
               "saml": {
                 "privateKeyName": null,
                 "publicKeyName": null,
@@ -203,6 +203,34 @@ metadata:
             },
             "postgresql": {
               "externalEndpoint": null,
+              "extraEnv": [
+                {
+                  "name": "POSTGRESQL_USER",
+                  "value": "anchoreengine"
+                },
+                {
+                  "name": "POSTGRESQL_PASSWORD",
+                  "value": "anchore-postgres,123"
+                },
+                {
+                  "name": "POSTGRESQL_DATABASE",
+                  "value": "anchore"
+                },
+                {
+                  "name": "PGUSER",
+                  "value": "postgres"
+                },
+                {
+                  "name": "LD_LIBRARY_PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/lib64"
+                },
+                {
+                  "name": "PATH",
+                  "value": "/opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                }
+              ],
+              "image": "registry.access.redhat.com/rhscl/postgresql-96-rhel7",
+              "imageTag": "latest",
               "persistence": {
                 "resourcePolicy": "nil",
                 "size": "20Gi"
