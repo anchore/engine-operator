@@ -1,4 +1,4 @@
-appVersion: 9.6.2
+appVersion: 9.6.18
 description: Object-relational database management system (ORDBMS) with an emphasis
   on extensibility and on standards-compliance.
 engine: gotpl
@@ -13,4 +13,4 @@ name: postgresql
 sources:
 - https://github.com/kubernetes/charts
 - https://github.com/docker-library/postgres
-version: 1.0.0
+version: 1.0.1
