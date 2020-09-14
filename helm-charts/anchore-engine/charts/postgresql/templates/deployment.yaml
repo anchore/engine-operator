@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: {{- if .Capabilities.APIVersions.Has "apps/v1" }} apps/v1 {{- else }} extensions/v1beta1 {{- end }}
 kind: Deployment
 metadata:
   name: {{ template "postgresql.fullname" . }}

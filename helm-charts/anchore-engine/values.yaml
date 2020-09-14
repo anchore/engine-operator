@@ -90,7 +90,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.8.0
+  image: docker.io/anchore/anchore-engine:v0.8.1
   imagePullPolicy: IfNotPresent
   # Set image pull secret name if using an anchore-engine image from a private registry
   imagePullSecretName:
@@ -122,6 +122,12 @@ anchoreGlobal:
   # A secret must be created in the same namespace as anchore-engine is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
   # Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
   certStoreSecretName: Null
+
+  # Specify your pod securityContext here, by default the anchore images utilize the user/group 'anchore' using uid/gid 1000
+  # To disable this securityContext comment out `runAsUser` & `runAsGroup`
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
 
   ###
   # Start of General Anchore Engine Configurations (populates /config/config.yaml)
@@ -500,7 +506,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v2.3.2
+  image: docker.io/anchore/enterprise:v2.4.0
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-dockerhub-creds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -555,6 +561,7 @@ anchoreEnterpriseFeeds:
 
   # Enable microsoft feeds
   msrcDriverEnabled: false
+  # For instructions on getting API key, see the msrc section of the Feeds docs - https://docs.anchore.com/current/docs/installation/feeds/
   msrcApiKey: null
   # Uncomment to add MSRC product IDs for generating their feed data, this extends the pre-defined list of product IDs
   # msrcWhitelist:
@@ -710,7 +717,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v2.3.2
+  image: docker.io/anchore/enterprise-ui:v2.4.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
