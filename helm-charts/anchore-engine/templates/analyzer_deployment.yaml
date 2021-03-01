@@ -56,6 +56,20 @@ spec:
       - name: {{ . }}
       {{- end }}
     {{- end }}
+    {{- if and .Values.anchoreGlobal.scratchVolume.fixGroupPermissions .Values.anchoreGlobal.securityContext.fsGroup }}
+      initContainers:
+        - name: mode-fixer
+          image: alpine
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: {{ $component }}-scratch
+              mountPath: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
+          command:
+            - sh
+            - -c
+            - (chmod 0775 {{ .Values.anchoreGlobal.scratchVolume.mountPath }}; chgrp {{ .Values.anchoreGlobal.securityContext.fsGroup }} {{ .Values.anchoreGlobal.scratchVolume.mountPath }} )
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -113,7 +127,7 @@ spec:
           subPath: license.yaml
         {{- end }}
         - name: analyzer-config-volume
-          mountPath: /anchore_service/analyzer_config.yaml
+          mountPath: {{ .Values.anchoreGlobal.serviceDir }}/analyzer_config.yaml
           subPath: analyzer_config.yaml
         - name: config-volume
           mountPath: /config/config.yaml
@@ -169,6 +183,9 @@ spec:
             name: {{ template "anchore-engine.fullname" .}}
         - name: {{ $component }}-scratch
           {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        - name: analyzer-config-volume
+          configMap:
+            name: {{ template "anchore-engine.analyzer.fullname" . }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -177,9 +194,6 @@ spec:
         - name: run
           emptyDir: {}
         {{- end }}
-        - name: analyzer-config-volume
-          configMap:
-            name: {{ template "anchore-engine.analyzer.fullname" . }}
         {{- with .Values.anchoreGlobal.certStoreSecretName }}
         - name: certs
           secret:
@@ -201,4 +215,7 @@ spec:
       {{- with .Values.anchoreAnalyzer.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}

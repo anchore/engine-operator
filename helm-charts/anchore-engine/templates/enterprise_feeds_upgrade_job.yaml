@@ -1,4 +1,4 @@
-{{- if .Values.anchoreEnterpriseGlobal.enabled }}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled .Values.anchoreEnterpriseFeedsUpgradeJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -23,6 +23,9 @@ spec:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
@@ -36,14 +39,14 @@ spec:
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         {{- if .Values.anchoreGlobal.dbConfig.ssl }}
-        args: ["/bin/bash", "-c", "anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask"]
+        args: ["/bin/bash", "-c", "anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask"]
         {{- else }}
-        args: ["/bin/bash", "-c", "anchore-enterprise-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
+        args: ["/bin/bash", "-c", "anchore-enterprise-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ default (include "anchore-engine.enterprise-feeds.fullname" .) .Values.anchoreEnterpriseFeeds.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
@@ -54,11 +57,6 @@ spec:
         {{- with .Values.anchoreEnterpriseFeeds.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        - name: ANCHORE_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "anchore-engine.fullname" . }}
-              key: .feedsDbPassword
         {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         volumeMounts:
         - name: certs
@@ -82,5 +80,8 @@ spec:
       {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
 {{- end }}

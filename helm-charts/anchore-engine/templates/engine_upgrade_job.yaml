@@ -1,3 +1,4 @@
+{{- if .Values.anchoreEngineUpgradeJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -20,6 +21,9 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
       annotations:
       {{- with .Values.anchoreGlobal.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreEngineUpgradeJob.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
@@ -86,3 +90,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
+      {{- end }}
+{{- end }}

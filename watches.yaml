@@ -1,5 +1,6 @@
----
-- version: v1alpha1
-  group: anchore.com
+# Use the 'create api' subcommand to add watches to this file.
+- group: charts.anchore.io
+  version: v1alpha1
   kind: AnchoreEngine
-  chart: /opt/helm/helm-charts/anchore-engine
+  chart: helm-charts/anchore-engine
+# +kubebuilder:scaffold:watch

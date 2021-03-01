@@ -17,7 +17,6 @@ data:
     tmp_dir: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
     log_level: {{ .Values.anchoreGlobal.logLevel }}
     image_analyze_timeout_seconds: {{ .Values.anchoreGlobal.imageAnalyzeTimeoutSeconds }}
-    cleanup_images: {{ .Values.anchoreGlobal.cleanupImages }}
     allow_awsecr_iam_auto: {{ .Values.anchoreGlobal.allowECRUseIAMRole }}
     host_id: "${ANCHORE_POD_NAME}"
     internal_ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
@@ -29,6 +28,7 @@ data:
 
     global_client_connect_timeout: {{ default 0 .Values.anchoreGlobal.clientConnectTimeout }}
     global_client_read_timeout: {{ default 0 .Values.anchoreGlobal.clientReadTimeout }}
+    max_compressed_image_size_mb: {{ default -1 .Values.anchoreGlobal.maxCompressedImageSizeMB }}
 
     metrics:
       enabled: {{ .Values.anchoreGlobal.enableMetrics }}
@@ -72,7 +72,12 @@ data:
           {{- end }}
           # Sync github data if available for GHSA matches
           github: {{ default "true" .Values.anchoreGlobal.syncGithub }}
-      {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
+    {{- if .Values.anchoreEnterpriseFeeds.url }}
+      url: "{{- .Values.anchoreEnterpriseFeeds.url }}"
+      ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
+      client_url:
+      token_url:
+    {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
       {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
       url: "https://{{- template "anchore-engine.enterprise-feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
       {{- else }}
@@ -81,12 +86,12 @@ data:
       ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
       client_url:
       token_url:
-      {{- else }}
+    {{- else }}
       client_url: "https://ancho.re/v1/account/users"
       token_url: "https://ancho.re/oauth/token"
       anonymous_user_username: anon@ancho.re
       anonymous_user_password: pbiU2RYZ2XrmYQ
-      {{- end }}
+    {{- end }}
       connection_timeout_seconds: {{ default 3 .Values.anchoreGlobal.feedsConnectionTimeout }}
       read_timeout_seconds: {{ default 180 .Values.anchoreGlobal.feedsReadTimeout }}
     default_admin_password: ${ANCHORE_ADMIN_PASSWORD}
@@ -95,7 +100,9 @@ data:
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
     keys:
-      secret: {{ .Values.anchoreGlobal.saml.secret }}
+      {{- if or .Values.anchoreGlobal.saml.secret .Values.anchoreGlobal.saml.useExistingSecret }}
+      secret: ${ANCHORE_SAML_SECRET}
+      {{- end }}
       {{- with .Values.anchoreGlobal.saml.publicKeyName }}
       public_key_path: /home/anchore/certs/{{- . }}
       {{- end }}
@@ -135,6 +142,7 @@ data:
         enabled: true
         require_auth: true
         endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreApi.service.port }}
         {{- if .Values.anchoreApi.external }}
@@ -162,12 +170,13 @@ data:
         endpoint_hostname: {{ template "anchore-engine.analyzer.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreAnalyzer.containerPort }}
+        max_request_threads: {{ default 50 .Values.anchoreAnalyzer.maxRequestThreads }}
         cycle_timer_seconds: 1
         cycle_timers:
           {{- toYaml .Values.anchoreAnalyzer.cycleTimers | nindent 10 }}
         max_threads: {{ .Values.anchoreAnalyzer.concurrentTasksPerWorker }}
         analyzer_driver: 'nodocker'
-        {{- if gt .Values.anchoreAnalyzer.layerCacheMaxGigabytes 0 }}
+        {{- if gt .Values.anchoreAnalyzer.layerCacheMaxGigabytes 0.0 }}
         layer_cache_enable: true
         {{- else }}
         layer_cache_enable: false
@@ -185,6 +194,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreCatalog.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreCatalog.maxRequestThreads }}
         cycle_timer_seconds: 1
         cycle_timers:
           # Interval to check for an update to a tag
@@ -195,6 +205,9 @@ data:
           vulnerability_scan: {{ .Values.anchoreCatalog.cycleTimers.vulnerability_scan }}
           # Interval at which the catalog looks for new work to put on the image analysis queue.
           analyzer_queue: {{ .Values.anchoreCatalog.cycleTimers.analyzer_queue }}
+          # Interval at which the catalog archival tasks are triggered.
+          archive_tasks: {{ .Values.anchoreCatalog.cycleTimers.archive_tasks }}
+          image_gc: {{ .Values.anchoreCatalog.cycleTimers.image_gc }}
           # Interval notifications will be processed for state changes
           {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
           notifications: 0
@@ -207,8 +220,10 @@ data:
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
-        archive:
-          {{- toYaml .Values.anchoreCatalog.archive | nindent 10 }}
+        analysis_archive:
+          {{- toYaml .Values.anchoreCatalog.analysis_archive | nindent 10 }}
+        object_store:
+          {{- toYaml .Values.anchoreCatalog.object_store | nindent 10 }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
@@ -220,6 +235,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.simplequeue.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreSimpleQueue.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreSimpleQueue.maxRequestThreads }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
@@ -228,6 +244,7 @@ data:
       policy_engine:
         enabled: true
         require_auth: true
+        max_request_threads: {{ default 50 .Values.anchorePolicyEngine.maxRequestThreads }}
         endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}

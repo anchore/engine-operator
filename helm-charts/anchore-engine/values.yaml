@@ -95,13 +95,17 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.8.2
+  image: docker.io/anchore/anchore-engine:v0.9.1
   imagePullPolicy: IfNotPresent
+
   # Set image pull secret name if using an anchore-engine image from a private registry
   imagePullSecretName:
 
-  # Set this value to True to setup the chart for OpenShift deployment compatibility.
-  openShiftDeployment: False
+  # Specify a service account name utilized to run all Anchore pods
+  serviceAccountName:
+
+  # Set this value to true to setup the chart for OpenShift deployment compatibility.
+  openShiftDeployment: false
 
   # Add additionnal labels to all kubernetes resources
   labels: {}
@@ -120,11 +124,19 @@ anchoreGlobal:
     #   value: bar
 
   # Specifies an existing secret to be used for admin and db passwords
+  # The secret should define the following environment vars:
+  # ANCHORE_ADMIN_PASSWORD
+  # ANCHORE_DB_PASSWORD
+  # ANCHORE_SAML_SECRET (if applicable)
   existingSecret: Null
 
   # The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
   # you need to provision 3x the size of the largest image (uncompressed) that you want to analyze for this space.
   scratchVolume:
+    # Some k8s Volumes do not properly respect the fsGroup permissions. These volumes will get mounted as root:root
+    # regardless of the security permissions requested. The fixGroupPermissions will create an initContainer that will
+    # fixup the permissions.
+    fixGroupPermissions: false
     mountPath: /analysis_scratch
     details:
       # Specify volume configuration here
@@ -139,6 +151,7 @@ anchoreGlobal:
   securityContext:
     runAsUser: 1000
     runAsGroup: 1000
+    fsGroup: 1000
 
   ###
   # Start of General Anchore Engine Configurations (populates /config/config.yaml)
@@ -146,7 +159,6 @@ anchoreGlobal:
   # Set where default configs are placed at startup. This must be a writable location for the pod.
   serviceDir: /anchore_service
   logLevel: INFO
-  cleanupImages: true
 
   # Define timeout, in seconds, for image analysis
   imageAnalyzeTimeoutSeconds: 36000
@@ -161,13 +173,15 @@ anchoreGlobal:
   metricsAuthDisabled: false
 
   # Sets the password & email address for the default anchore-engine admin user.
-  defaultAdminPassword: foobar
+  defaultAdminPassword:
   defaultAdminEmail: example@email.com
 
   saml:
-    # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
+    # Locations for keys used for signing and encryption. Only one of 'secret' or 'privateKeyName'/'publicKeyName' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
     secret: Null
+    # If set to true, use the secret specified in anchoreGlobal.existingSecret to set the ANCHORE_SAML_SECRET env variable
+    useExistingSecret: false
     privateKeyName: Null
     publicKeyName: Null
 
@@ -216,6 +230,27 @@ anchoreGlobal:
     # <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured.
     general: {}
       # url: "http://somehost:9090/<notification_type>/<userId>"
+
+  # Custom policy bundles can be specified here. This values section represents a kubernetes configmap that is volume mounted
+  # to <anchore_service_dir>/bundles and made available to all anchore services. See the docs for details on how to create policy bundles
+  # https://docs.anchore.com/current/docs/engine/general/concepts/policy/bundles/
+  policyBundles:
+#     custom_policy_bundle1.json: |
+#       {
+#         "id": "custom1",
+#         "version": "1_0",
+#         "name": "My custom bundle",
+#         "comment": "My system's custom bundle",
+#         "whitelisted_images": [],
+#         "blacklisted_images": [],
+#         "mappings": [],
+#         "whitelists": [],
+#         "policies": []
+#       }
+#     custom_policy_bundle2.json: |
+#       {
+#         ....
+#       }
 
   # Allow configuration of Kubernetes probes
   probes:
@@ -375,12 +410,16 @@ anchoreCatalog:
     vulnerability_scan: 14400
     # Interval at which the catalog looks for new work to put on the image analysis queue.
     analyzer_queue: 1
+    # Interval at which the catalog archival tasks are triggered.
+    archive_tasks: 43200
     # Interval notifications will be processed for state changes
     notifications: 30
     # Intervals service state updates are polled for the system status
     service_watcher: 15
     # Interval between checks to repo for new tags
     repo_watcher: 60
+    # Interval for when the catalog garbage collects images marked for deletion
+    image_gc: 60
 
   # Event log configuration for webhooks
   events:
@@ -391,7 +430,55 @@ anchoreCatalog:
         - error
         # - info
 
-  archive:
+  analysis_archive:
+    compression:
+      enabled: true
+      min_size_kbytes: 100
+    storage_driver:
+      # Valid storage driver names: 'db', 's3', 'swift'
+      name: db
+      config: {}
+
+      # Example S3 Configuration:
+      # name: s3
+      # config:
+      #   # All objects are stored in a single bucket, defined here
+      #   bucket: "anchore-engine-testing"
+      #   # A prefix for keys in the bucket if desired (optional)
+      #   prefix: "internaltest"
+      #   # Create the bucket if it doesn't already exist
+      #   create_bucket: false
+          # Url only needed for non-AWS S3 implementations (e.g. minio). Otherwise, configure the region instead
+      #   #url: "https://s3.amazonaws.com"
+      #   # AWS region to connect to if 'url' not specified, if both are set, then 'url' has precedent
+      #   region: us-west-2
+      #   # For Auth can provide access/secret keys or use 'iamauto' which will use an instance profile or any credentials found in normal aws search paths/metadata service
+      #   access_key: XXXX
+      #   secret_key: YYYY
+      #   iamauto: false
+
+      # Example Minio configuration (basically same as s3 example):
+      # name: s3
+      # config:
+      #   url: http://<minio url>:9000
+      #   bucket: mybucket
+      #   access_key: xxxxxx
+      #   secret_key: yyyyyy
+      #   create_bucket: true
+
+      # Example Swift Configuration:
+      # name: swift
+      # config:
+      #     # Config for swift has a few options, just add the keys and names as used to configure a swiftclient here. All are passed directly to the client impl.
+      #     user: "test:tester"
+      #     key: "testing"
+      #     auth: "http://swift_ephemeral:8080/auth/v1.0"
+      #     # The swift container where data will be stored
+      #     container: "local_test_anchore"
+      #     # Create the container if it is not already present
+      #     create_container: false
+
+  object_store:
     compression:
       enabled: true
       min_size_kbytes: 100
@@ -529,21 +616,23 @@ anchoreSimpleQueue:
 
 # Pod configuration for the helm post-install-hook engine upgrade Job
 anchoreEngineUpgradeJob:
+  enabled: true
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  annotations: {}
 
 # This section is used for configuring anchore enterprise.
 anchoreEnterpriseGlobal:
   enabled: false
   # Name of kubernetes secret containing your license.yaml file.
-  # Create this secret with the following command - kubectl create secret generic anchore-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
+  # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v2.4.1
+  image: docker.io/anchore/enterprise:v3.0.0
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
-  # Create this secret with the following command - kubectl create secret docker-registry anchore-dockerhub-creds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
+  # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
   imagePullSecretName: anchore-enterprise-pullcreds
 
 # Configure the second postgres database instance for the enterprise feeds service.
@@ -588,6 +677,9 @@ anchoreEnterpriseFeeds:
   # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
   enabled: true
 
+  # Set custom feeds URL if multiple Anchore deployments are using the same feeds service
+  url: ""
+
   # Enable github advisory feeds
   githubDriverEnabled: false
   # GitHub advisory feeds require a github developer personal access token with no permission scopes selected.
@@ -609,6 +701,14 @@ anchoreEnterpriseFeeds:
   # Time delay in seconds between consecutive driver runs for processing data
   cycleTimers:
     driver_sync: 7200
+
+  # Specifies an existing secret to be used for anchore admin and db passwords
+  # The secret should define the following environment vars:
+  # ANCHORE_ADMIN_PASSWORD
+  # ANCHORE_FEEDS_DB_PASSWORD
+  # ANCHORE_SAML_SECRET (if applicable)
+
+  existingSecret: Null
 
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
@@ -647,9 +747,11 @@ anchoreEnterpriseFeeds:
 
 # Pod configuration for the helm post-install-hook feeds upgrade Job
 anchoreEnterpriseFeedsUpgradeJob:
+  enabled: true
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  annotations: {}
 
 # Configure the Anchore Enterprise role based access control component.
 # This component consists of 2 containers that run as side-cars in the anchore engine api pod.
@@ -763,13 +865,19 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v2.4.1
+  image: docker.io/anchore/enterprise-ui:v3.0.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
   extraEnv: []
     # - name: foo
     #   value: bar
+
+  # Specifies an existing secret to be used for db and redis endpoints
+  # This secret should define the following ENV vars
+  # ANCHORE_APPDB_URI
+  # ANCHORE_REDIS_URI
+  existingSecret: Null
 
   # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null
@@ -792,17 +900,6 @@ anchoreEnterpriseUi:
   # user session keys and data is emptied on application startup. If the datastore
   # is flushed, any users with active sessions will be required to re-authenticate.
   redisFlushdb: true
-
-  # The (optional) `policy_hub_uri` key specifies the address of a Policy Hub
-  # service. The value must be a string containing a properly-formed 'http' or
-  # 'https' URI, and can be overridden by using the `ANCHORE_POLICY_HUB_URI`
-  # environment variable.
-  #
-  # When this value is set, the Policy Hub component is enabled within the
-  # Policy Manager view (`/policy`). Note that the availability and integrity of
-  # Policy Hub data is determined by this component at run-time when this
-  # component is accessed.
-  policyHubUri: 'http://hub.anchore.io'
 
   # The (optional) `custom_links` key allows a list of up to 10 external links to
   # be provided (additional items will be excluded). The top-level `title` key
@@ -890,9 +987,11 @@ anchore-ui-redis:
 
 # Pod configuration for the helm post-install-hook enterprise engine upgrade Job
 anchoreEnterpriseEngineUpgradeJob:
+  enabled: true
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  annotations: {}
 
 # To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
 # This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault

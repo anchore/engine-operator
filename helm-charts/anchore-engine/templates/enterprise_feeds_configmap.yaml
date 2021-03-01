@@ -33,7 +33,9 @@ data:
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
     keys:
-      secret: {{ .Values.anchoreGlobal.saml.secret }}
+      {{- if or .Values.anchoreGlobal.saml.secret .Values.anchoreGlobal.saml.useExistingSecret }}
+      secret: ${ANCHORE_SAML_SECRET}
+      {{- end }}
       {{- with .Values.anchoreGlobal.saml.publicKeyName }}
       public_key_path: /home/anchore/certs/{{- . }}
       {{- end }}
@@ -55,9 +57,9 @@ data:
     credentials:
       database:
         {{- if .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
         {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
         {{- end }}
         db_connect_args:
           timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
@@ -75,6 +77,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}
         # Time delay in seconds between consecutive driver runs for processing data
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseFeeds.cycleTimers | nindent 10 }}
@@ -100,7 +103,7 @@ data:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
             enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
+            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
           amzn:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.amazonDriverEnabled }}
           centos:

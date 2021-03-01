@@ -122,6 +122,13 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
+        {{- if .Values.anchoreGlobal.policyBundles }}
+        {{- range $key, $value := .Values.anchoreGlobal.policyBundles }}
+        - name: policy-bundle-volume
+          mountPath: {{ $.Values.anchoreGlobal.serviceDir  }}/bundles/{{ $key }}
+          subPath: {{ $key }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           mountPath: /anchore_service_config
@@ -311,7 +318,7 @@ spec:
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -383,7 +390,7 @@ spec:
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -448,6 +455,11 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "anchore-engine.fullname" . }}
+        {{- if .Values.anchoreGlobal.policyBundles }}
+        - name: policy-bundle-volume
+          configMap:
+            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -485,6 +497,9 @@ spec:
       {{- with .Values.anchoreApi.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
 
 ---
