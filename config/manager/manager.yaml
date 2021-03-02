@@ -2,32 +2,32 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: controller-manager
+    control-plane: engine-operator-manager
   name: system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
+  name: engine-operator-manager
   namespace: system
   labels:
-    control-plane: controller-manager
+    control-plane: engine-operator-manager
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
+      control-plane: engine-operator-manager
   replicas: 1
   template:
     metadata:
       labels:
-        control-plane: controller-manager
+        control-plane: engine-operator-manager
     spec:
       containers:
-      - image: "docker.io/anchore/engine-operator:v0.1.12"
+      - image: "docker.io/anchore/engine-operator:v0.2.0"
         args:
         - "--enable-leader-election"
         - "--leader-election-id=engine-operator"
-        name: manager
+        name: engine-operator-manager
         livenessProbe:
           httpGet:
             path: /readyz
