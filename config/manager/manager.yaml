@@ -24,6 +24,7 @@ spec:
     spec:
       containers:
       - image: controller:latest
+        imagePullPolicy: Always
         args:
         - "--enable-leader-election"
         - "--leader-election-id=engine-operator"
