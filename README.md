@@ -6,10 +6,16 @@ This operator is based on the official [Helm Chart](https://github.com/anchore/a
 
 ## Quickstart
 
-To stand up an Anchore Engine deployment on your cluster, issue the follow commands.
+To stand up an Anchore Engine deployment on your cluster using the engine-operator, issue the follow command
 
 ```bash
 make deploy
+```
+
+To delete the Anchore Engine deployment and the engine-operator from your cluster, issue the follow command
+
+```bash
+make undeploy
 ```
 
 ## Testing the Operator for installation with OLM
