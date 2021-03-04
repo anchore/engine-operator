@@ -21,8 +21,8 @@ Install the following:
 * [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
 
 ```bash
-export IMG="quay.io/btodhunter/engine-operator:v0.2.0"
-export BUNDLE_IMG="quay.io/btodhunter/engine-operator-bundle:v0.2.0"
+export IMG="docker.io/anchore/engine-operator-dev:latest"
+export BUNDLE_IMG="docker.io/anchore/engine-operator-dev:bundle-latest"
 make docker-build IMG="$IMG"
 make bundle IMG="$IMG"
 make bundle-build BUNDLE_IMG="$BUNDLE_IMG"
