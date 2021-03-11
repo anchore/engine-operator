@@ -6,6 +6,3 @@ spec:
   # Default values copied from <project_dir>/helm-charts/anchore-engine/values.yaml
   anchoreGlobal:
     defaultAdminEmail: example@email.com
-    image: docker.io/anchore/anchore-engine:v0.9.1
-  postgresql:
-    image: postgres:9.6.18

@@ -32,7 +32,7 @@ BUNDLE_IMG ?= engine-operator-bundle:$(VERSION)
 IMG ?= "docker.io/anchore/engine-operator:$(VERSION)"
 
 # Image URL to use for RedHat OperatorHub
-REDHAT_IMG ?= "registry.connect.redhat.com/anchore/engine-operator:$(VERSION)-r0"
+REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:$(VERSION)-r0
 
 all: docker-build
 
@@ -59,7 +59,7 @@ undeploy: kustomize
 
 # Build the docker image
 docker-build:
-	docker build -t ${IMG} .
+	docker build -t ${IMG} . --no-cache
 
 # Push the docker image
 docker-push:
@@ -119,10 +119,10 @@ bundle: kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	echo "$$REDHATLABELS" >> bundle.Dockerfile
-	sed -i 's/REDHAT_IMAGE/$(REDHAT_IMAGE)/' bundle/manifests/engine-operator.clusterserviceversion.yaml
+	sed -i 's|REDHAT_IMAGE|$(REDHAT_IMG)|' bundle/manifests/engine-operator.clusterserviceversion.yaml
 	operator-sdk bundle validate ./bundle
 
 # Build the bundle image.
 .PHONY: bundle-build
 bundle-build:
-	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) . --no-cache

@@ -37,7 +37,7 @@ docker push "$BUNDLE_IMG"
 crc setup
 crc config set memory 16000
 crc start
-crc oc-env
+eval $(crc oc-env)
 operator-sdk run bundle "$BUNDLE_IMG"
 ```
 

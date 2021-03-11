@@ -176,7 +176,7 @@ data:
           {{- toYaml .Values.anchoreAnalyzer.cycleTimers | nindent 10 }}
         max_threads: {{ .Values.anchoreAnalyzer.concurrentTasksPerWorker }}
         analyzer_driver: 'nodocker'
-        {{- if gt .Values.anchoreAnalyzer.layerCacheMaxGigabytes 0 }}
+        {{- if gt .Values.anchoreAnalyzer.layerCacheMaxGigabytes 0.0 }}
         layer_cache_enable: true
         {{- else }}
         layer_cache_enable: false

@@ -6,7 +6,7 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "true"
-    containerImage: "REDHAT_IMAGE"
+    containerImage: REDHAT_IMAGE
     createdAt: ""
     description: Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement.
     repository: https://github.com/anchore/engine-operator
