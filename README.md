@@ -44,7 +44,7 @@ operator-sdk run bundle "$BUNDLE_IMG"
 ### Clean up OLM install
 
 ```bash
-operator-sdk cleanup engine-operator
+operator-sdk cleanup anchore-engine
 crc stop
 crc delete
 ```

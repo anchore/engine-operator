@@ -1,6 +1,6 @@
 domain: anchore.io
 layout: helm.sdk.operatorframework.io/v1
-projectName: engine-operator
+projectName: anchore-engine
 resources:
 - group: charts
   kind: AnchoreEngine

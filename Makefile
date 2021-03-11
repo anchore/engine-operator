@@ -119,7 +119,7 @@ bundle: kustomize
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	echo "$$REDHATLABELS" >> bundle.Dockerfile
-	sed -i 's|REDHAT_IMAGE|$(REDHAT_IMG)|' bundle/manifests/engine-operator.clusterserviceversion.yaml
+	sed -i 's|REDHAT_IMAGE|$(REDHAT_IMG)|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
 	operator-sdk bundle validate ./bundle
 
 # Build the bundle image.
