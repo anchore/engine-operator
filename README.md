@@ -29,9 +29,9 @@ Install the following:
 ```bash
 export IMG="docker.io/anchore/engine-operator-dev:latest"
 export BUNDLE_IMG="docker.io/anchore/engine-operator-dev:bundle-latest"
-make docker-build IMG="$IMG"
-make bundle IMG="$IMG"
-make bundle-build BUNDLE_IMG="$BUNDLE_IMG"
+make docker-build
+make bundle REDHAT_IMG="$IMG"
+make bundle-build
 docker push "$IMG"
 docker push "$BUNDLE_IMG"
 crc setup

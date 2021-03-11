@@ -26,13 +26,13 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # BUNDLE_IMG defines the image:tag used for the bundle. 
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= engine-operator-bundle:$(VERSION)
+BUNDLE_IMG ?= engine-operator-bundle:v$(VERSION)
 
 # Image URL to use all building/pushing image targets
-IMG ?= "docker.io/anchore/engine-operator:$(VERSION)"
+IMG ?= docker.io/anchore/engine-operator:v$(VERSION)
 
 # Image URL to use for RedHat OperatorHub
-REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:$(VERSION)-r0
+REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:v$(VERSION)-r0
 
 all: docker-build
 
@@ -116,7 +116,7 @@ endef
 export REDHATLABELS
 bundle: kustomize
 	operator-sdk generate kustomize manifests -q
-	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	echo "$$REDHATLABELS" >> bundle.Dockerfile
 	sed -i 's|REDHAT_IMAGE|$(REDHAT_IMG)|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
