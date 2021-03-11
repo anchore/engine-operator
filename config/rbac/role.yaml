@@ -45,20 +45,26 @@ rules:
   - patch
   - update
   - watch
-- verbs:
-  - "*"
-  apiGroups:
+- apiGroups:
   - ""
   resources:
   - "configmaps"
   - "persistentvolumeclaims"
   - "secrets"
   - "services"
-- verbs:
+  verbs:
   - "*"
-  apiGroups:
+- apiGroups:
   - "apps"
   resources:
   - "deployments"
+  verbs:
+  - "*"
+- apiGroups:
+  - "batch"
+  resources:
+  - "jobs"
+  verbs:
+  - "*"
 
 # +kubebuilder:scaffold:rules
