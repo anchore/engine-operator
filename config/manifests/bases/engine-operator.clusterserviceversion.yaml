@@ -7,11 +7,11 @@ metadata:
     categories: Security
     certified: "true"
     containerImage: "REDHAT_IMAGE"
-    createdAt: "CREATION_TIMESTAMP"
+    createdAt: ""
     description: Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement.
     repository: https://github.com/anchore/engine-operator
     support: anchore.slack.com
-  name: anchore-engine-operator.v0.0.0
+  name: engine-operator.v0.0.0
   namespace: anchore
 spec:
   apiservicedefinitions: {}
@@ -20,7 +20,7 @@ spec:
     - description: Deploys Anchore Engine
       displayName: Anchore Engine Operator
       kind: AnchoreEngine
-      name: anchoreengines.charts.anchore.io
+      name: anchoreengines.anchore.com
       version: v1alpha1
   description: "Anchore Engine is an open source software system that provides a centralized service for analyzing container images, \nscanning for security vulnerabilities, and enforcing deployment policies. Anchore Engine is provided as a Docker \ncontainer image that can be run standalone or with an orchestration platform such as Kubernetes. Anchore Engine allows \nusers to perform detailed analysis on their container images, run queries, produce reports, and define policies that \ncan be used in CI/CD pipelines. Users can extend Anchore Engine with plugins that add new queries, image analysis, and \npolicies. Anchore Engine can be accessed directly through a RESTful API or via the Anchore CLI.\n\nThe Anchore Engine Operator is based on the official stable [Helm Chart](https://github.com/anchore/anchore-charts/tree/master/stable/anchore-engine)."
   displayName: Anchore Engine Operator

@@ -27,7 +27,7 @@ spec:
         imagePullPolicy: Always
         args:
         - "--enable-leader-election"
-        - "--leader-election-id=anchore-engine"
+        - "--leader-election-id=engine-operator"
         name: manager
         livenessProbe:
           httpGet:
