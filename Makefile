@@ -65,6 +65,11 @@ docker-build:
 docker-push:
 	docker push ${IMG}
 
+# Push the RedHat docker image
+docker-push-redhat:
+	docker tag ${IMG} ${REDHAT_IMAGE}
+	docker push ${REDHAT_IMAGE}
+
 PATH  := $(PATH):$(PWD)/bin
 SHELL := env PATH=$(PATH) /bin/sh
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
@@ -126,3 +131,6 @@ bundle: kustomize
 .PHONY: bundle-build
 bundle-build:
 	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) . --no-cache
+
+docker-bundle-push:
+	docker push $(BUNDLE_IMG)

@@ -18,6 +18,19 @@ To delete the Anchore Engine deployment and the engine-operator from your cluste
 make undeploy
 ```
 
+## Updating Operator with newest chart version
+
+* Install/Update operator-sdk cli tool - [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
+* Copy latest anchore-engine helm chart to `helm-charts/anchore-engine`
+* Update `Dockerfile` with latest helm-operator image (matching the version of the operator-sdk used to update the operator)
+* Check what changes are needed for the sdk version upgrade (and previous versions) - [Upgrade SDK Version](https://sdk.operatorframework.io/docs/upgrading-sdk-version/)
+* Run `make bundle` to create a new operator bundle
+* Run `make docker-build` to create docker image
+* Run `make docker-push` to push `anchore/engine-operator` image
+* Run `make docker-push-redhat` to push the operator image to the RedHat Marketplace
+* Run `make bundle-build` to create the bundle image
+* Run `make docker-push-bundle` to push the bundle image to the RedHat Marketplace
+
 ## Testing the Operator for installation with OLM
 
 Install the following:
