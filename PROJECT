@@ -2,10 +2,12 @@ domain: anchore.io
 layout: helm.sdk.operatorframework.io/v1
 projectName: anchore-engine
 resources:
-- group: charts
+-
+  domain: anchore.io
+  group: charts
   kind: AnchoreEngine
   version: v1alpha1
-version: 3-alpha
+version: "3"
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
