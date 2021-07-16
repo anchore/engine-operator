@@ -22,13 +22,17 @@ spec:
       labels:
         control-plane: controller-manager
     spec:
+      securityContext:
+        runAsNonRoot: true
       containers:
-      - image: controller:latest
+      - name: manager
+        securityContext:
+          allowPrivilegeEscalation: false
+        image: controller:latest
         imagePullPolicy: Always
         args:
-        - "--enable-leader-election"
+        - "--leader-elect"
         - "--leader-election-id=anchore-engine"
-        name: manager
         livenessProbe:
           httpGet:
             path: /healthz
@@ -48,4 +52,5 @@ spec:
           requests:
             cpu: 100m
             memory: 60Mi
+      serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
