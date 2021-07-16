@@ -24,8 +24,8 @@ rules:
   - create
   - patch
 - apiGroups:
-  - ""
   - coordination.k8s.io
   resources:
-  - configmaps
   - leases
+  verbs:
+  - get
