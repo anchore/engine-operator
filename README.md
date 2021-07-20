@@ -52,7 +52,7 @@ make undeploy
     ```
 
 * [Test the operator](#testing-the-operator-for-installation-with-olm)
-* Reset $IMG & BUNDLE_IMAGE environment variables `unset IMG BUNDLE_IMG`
+* Reset $IMG & BUNDLE_IMAGE environment variables `unset IMG BUNDLE_IMG REDHAT_IMG`
 * Run `make bundle` to create a new operator bundle
 * Run `make docker-build` to create docker image
 * Run `make docker-push` to push `anchore/engine-operator` image
@@ -68,12 +68,14 @@ Install the following:
 * [oc](https://docs.openshift.com/container-platform/4.6/cli_reference/openshift_cli/getting-started-cli.html#installing-openshift-cli)
 * [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
 
+### Setup local OpenShift cluster & install operator
+
 ```bash
 export IMG="docker.io/anchore/engine-operator-dev:latest"
 export BUNDLE_IMG="docker.io/anchore/engine-operator-dev:bundle-latest"
+export REDHAT_IMG="$IMG"
 make docker-build
 make docker-push
-make bundle REDHAT_IMG="$IMG"
 make docker-bundle-build
 make docker-bundle-push
 crc setup
@@ -82,7 +84,19 @@ crc config set memory 16000
 eval $(crc oc-env)
 oc login -u kubeadmin -p <PASSWORD_FROM_STDOUT> https://api.crc.testing:6443
 operator-sdk run bundle "$BUNDLE_IMG"
+crc console
 ```
+
+### From the crc console, install an instance of anchore-engine using the operator
+
+* Login using `kubeadmin` and the password from `crc start` stdout
+* Navigate to Operators -> Install Operators -> Anchore Engine Operator
+* Deploy an instance of anchore-engine from the Anchore Engine Operator
+  * Under `Provided APIs` click the `Create Instance` button
+  * Add labels or update the name as needed
+  * If you want to customize the anchore-engine deployment, use a YAML spec and add custom values
+  * click the `Create` button
+* Ensure that anchore-engine deployed correctly by checking the status of all pods under the `Resources` tab
 
 ### Clean up OLM install
 
