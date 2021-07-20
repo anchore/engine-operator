@@ -9,12 +9,14 @@ This operator is based on the official [Helm Chart](https://github.com/anchore/a
 To stand up an Anchore Engine deployment on your cluster using the engine-operator, issue the follow command:
 
 ```bash
+make install
 make deploy
 ```
 
 To delete the Anchore Engine deployment and the engine-operator from your cluster, issue the follow command:
 
 ```bash
+make uninstall
 make undeploy
 ```
 
@@ -52,13 +54,26 @@ make undeploy
     ```
 
 * [Test the operator](#testing-the-operator-for-installation-with-olm)
-* Reset $IMG & BUNDLE_IMAGE environment variables `unset IMG BUNDLE_IMG REDHAT_IMG`
 * Run `make bundle` to create a new operator bundle
 * Run `make docker-build` to create docker image
 * Run `make docker-push` to push `anchore/engine-operator` image
 * Run `make docker-push-redhat` to push the operator image to the RedHat Marketplace
 * Run `make docker-bundle-build` to create the bundle image
 * Run `make docker-push-bundle` to push the bundle image to the RedHat Marketplace
+* Move the newly created bundle directories to a version specific directory under `bundle/`
+
+    ```bash
+    mkdir bundle/<OPERATOR_VERSION>
+    mv bundle/{manifests,metadata,scorecard,tests} bundle/<OPERATOR_VERSION>
+    ```
+
+* Reset the manager kustomization config back to the original DockerHub image
+
+    ```bash
+    git reset --hard config/manager/kustomization.yaml
+    ```
+
+* Commit all changes & push to remote branch for PR
 
 ## Testing the Operator for installation with OLM
 
@@ -97,10 +112,20 @@ crc console
   * If you want to customize the anchore-engine deployment, use a YAML spec and add custom values
   * click the `Create` button
 * Ensure that anchore-engine deployed correctly by checking the status of all pods under the `Resources` tab
+* Port forward anchore-engine API pod & check anchore-engine status
+
+    ```bash
+    kubectl port-forward svc/anchoreengine-sample-anchore-engine-api 8228:8228
+    ANCHORE_CLI_PASS=$(kubectl get secret anchoreengine-sample-anchore-engine-admin-pass -o 'go-template={{index .data "ANCHORE_ADMIN_PASSWORD"}}' | base64 -D -)
+    anchore-cli system status
+    ```
 
 ### Clean up OLM install
 
 ```bash
+unset IMG BUNDLE_IMG REDHAT_IMG
+rm -rf bundle/{manifests,metadata,scorecard,tests}
+git reset --hard config/manager/kustomization.yaml
 operator-sdk cleanup anchore-engine
 crc stop
 crc delete
