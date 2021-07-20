@@ -3,7 +3,7 @@
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
-VERSION ?= 0.2.0
+VERSION ?= 1.0.0
 
 # CHANNELS define the bundle channels used in the bundle. 
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "preview,fast,stable")
@@ -34,42 +34,41 @@ IMG ?= docker.io/anchore/engine-operator:v$(VERSION)
 # Image URL to use for RedHat OperatorHub
 REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:v$(VERSION)-r0
 
-all: docker-build
-
+.PHONY: help
 help: ## Display this help.
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-# Run against the configured Kubernetes cluster in ~/.kube/config
-run: helm-operator
+.PHONY: run
+run: helm-operator ## Run against the configured Kubernetes cluster in ~/.kube/config
 	$(HELM_OPERATOR) run
 
-# Install CRDs into a cluster
-install: kustomize
+.PHONY: install
+install: kustomize ## Install CRDs into a cluster
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
-# Uninstall CRDs from a cluster
-uninstall: kustomize
+PHONY: uninstall
+uninstall: kustomize ## Uninstall CRDs from a cluster
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: kustomize
+.PHONY: deploy
+deploy: kustomize ## Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
-# Undeploy controller in the configured Kubernetes cluster in ~/.kube/config
-undeploy: kustomize
+.PHONY: undeploy
+undeploy: kustomize ## Undeploy controller in the configured Kubernetes cluster in ~/.kube/config
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
-# Build the docker image
-docker-build:
+.PHONY: docker-build
+docker-build: ## Build the docker image
 	docker build -t ${IMG} . --no-cache
 
-# Push the docker image
-docker-push:
+.PHONY: docker-push
+docker-push: ## Push the docker image
 	docker push ${IMG}
 
-# Push the RedHat docker image
-docker-push-redhat:
+.PHONY: docker-push-redhat
+docker-push-redhat: ## Push the RedHat docker image
 	docker tag ${IMG} ${REDHAT_IMAGE}
 	docker push ${REDHAT_IMAGE}
 
@@ -78,10 +77,9 @@ SHELL := env PATH=$(PATH) /bin/sh
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed 's/x86_64/amd64/')
 
-# Download kustomize locally if necessary, preferring the $(pwd)/bin path over global if both exist.
 .PHONY: kustomize
 KUSTOMIZE = $(shell pwd)/bin/kustomize
-kustomize:
+kustomize: ## Download kustomize locally if necessary, preferring the $(pwd)/bin path over global if both exist.
 ifeq (,$(wildcard $(KUSTOMIZE)))
 ifeq (,$(shell which kustomize 2>/dev/null))
 	@{ \
@@ -95,10 +93,9 @@ KUSTOMIZE = $(shell which kustomize)
 endif
 endif
 
-# Download helm-operator locally if necessary, preferring the $(pwd)/bin path over global if both exist.
 .PHONY: helm-operator
 HELM_OPERATOR = $(shell pwd)/bin/helm-operator
-helm-operator:
+helm-operator: ## Download helm-operator locally if necessary, preferring the $(pwd)/bin path over global if both exist.
 ifeq (,$(wildcard $(HELM_OPERATOR)))
 ifeq (,$(shell which helm-operator 2>/dev/null))
 	@{ \
@@ -122,7 +119,7 @@ endef
 
 .PHONY: bundle
 export REDHATLABELS
-bundle: kustomize
+bundle: kustomize ## Use kustomize to create the bundle directory for pushing to the RedHat marketplace
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
@@ -130,10 +127,10 @@ bundle: kustomize
 	sed -i 's|REDHAT_IMAGE|$(REDHAT_IMG)|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
 	operator-sdk bundle validate ./bundle
 
-# Build the bundle image.
-.PHONY: bundle-build
-bundle-build:
+.PHONY: docker-bundle-build
+docker-bundle-build: bundle ## Build the bundle image.
 	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) . --no-cache
 
-docker-bundle-push:
+.PHONY: docker-bundle-push
+docker-bundle-push: ## Push the bundle image to dockerhub
 	docker push $(BUNDLE_IMG)
