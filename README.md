@@ -80,6 +80,7 @@ crc setup
 crc start
 crc config set memory 16000
 eval $(crc oc-env)
+oc login -u kubeadmin -p <PASSWORD_FROM_STDOUT> https://api.crc.testing:6443
 operator-sdk run bundle "$BUNDLE_IMG"
 ```
 
