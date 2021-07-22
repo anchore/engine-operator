@@ -42,6 +42,14 @@ spec:
       {{- with .Values.anchoreCatalog.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
+        checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
+      {{- if .Values.anchoreGlobal.policyBundles }}
+        checksum/policy-config: {{ include (print $.Template.BasePath "/policy_bundle_configmap.yaml") . | sha256sum }}
+      {{- end }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
@@ -87,8 +95,15 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -115,6 +130,13 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
+        {{- if .Values.anchoreGlobal.policyBundles }}
+        {{- range $key, $value := .Values.anchoreGlobal.policyBundles }}
+        - name: policy-bundle-volume
+          mountPath: {{ $.Values.anchoreGlobal.serviceDir  }}/bundles/{{ $key }}
+          subPath: {{ $key }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           mountPath: /anchore_service_config
@@ -162,6 +184,11 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "anchore-engine.fullname" . }}
+        {{- if .Values.anchoreGlobal.policyBundles }}
+        - name: policy-bundle-volume
+          configMap:
+            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -191,6 +218,11 @@ spec:
       {{- with .Values.anchoreCatalog.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ .Values.anchoreGlobal.serviceAccountName }}
+      {{- else if .Values.anchoreCatalog.createServiceAccount }}
+      serviceAccountName: {{ template "anchore-engine.catalog.fullname" . }}
       {{- end }}
 
 ---
@@ -224,3 +256,68 @@ spec:
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}
+
+{{- if and .Values.anchoreCatalog.createServiceAccount .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "anchore-engine.catalog.fullname" . }}
+  labels:
+    {{- with .Values.anchoreCatalog.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.anchoreCatalog.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "anchore-engine.catalog.fullname" . }}
+  labels:
+    {{- with .Values.anchoreCatalog.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.anchoreCatalog.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+- apiGroups: [""]
+  resources: ["pods","namespaces"]
+  verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "anchore-engine.catalog.fullname" . }}
+  labels:
+    {{- with .Values.anchoreCatalog.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.anchoreCatalog.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "anchore-engine.catalog.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ template "anchore-engine.catalog.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

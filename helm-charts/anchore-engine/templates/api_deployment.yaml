@@ -42,6 +42,14 @@ spec:
       {{- with .Values.anchoreApi.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
+        checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
+      {{- if .Values.anchoreGlobal.policyBundles }}
+        checksum/policy-config: {{ include (print $.Template.BasePath "/policy_bundle_configmap.yaml") . | sha256sum }}
+      {{- end }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
@@ -87,8 +95,15 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -107,7 +122,7 @@ spec:
         - name: ANCHORE_CLI_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+              name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
               key: ANCHORE_ADMIN_PASSWORD
         {{- end }}
         ports:
@@ -122,6 +137,13 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
+        {{- if .Values.anchoreGlobal.policyBundles }}
+        {{- range $key, $value := .Values.anchoreGlobal.policyBundles }}
+        - name: policy-bundle-volume
+          mountPath: {{ $.Values.anchoreGlobal.serviceDir  }}/bundles/{{ $key }}
+          subPath: {{ $key }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           mountPath: /anchore_service_config
@@ -167,8 +189,15 @@ spec:
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -237,8 +266,15 @@ spec:
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -310,8 +346,15 @@ spec:
           name: reports-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -382,8 +425,15 @@ spec:
           name: notifi-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -448,6 +498,11 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "anchore-engine.fullname" . }}
+        {{- if .Values.anchoreGlobal.policyBundles }}
+        - name: policy-bundle-volume
+          configMap:
+            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -485,6 +540,9 @@ spec:
       {{- with .Values.anchoreApi.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
 
 ---

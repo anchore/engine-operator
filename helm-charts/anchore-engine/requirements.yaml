@@ -1,4 +1,0 @@
-dependencies:
-  - name: postgresql
-    version: "1.0.1"
-    condition: postgresql.enabled

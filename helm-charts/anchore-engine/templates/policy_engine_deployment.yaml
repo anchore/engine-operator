@@ -42,6 +42,11 @@ spec:
       {{- with .Values.anchorePolicyEngine.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
+        checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
@@ -56,6 +61,20 @@ spec:
       - name: {{ . }}
       {{- end }}
     {{- end }}
+    {{- if and .Values.anchoreGlobal.scratchVolume.fixGroupPermissions .Values.anchoreGlobal.securityContext.fsGroup }}
+      initContainers:
+        - name: mode-fixer
+          image: alpine
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: {{ $component }}-scratch
+              mountPath: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
+          command:
+            - sh
+            - -c
+            - (chmod 0775 {{ .Values.anchoreGlobal.scratchVolume.mountPath }}; chgrp {{ .Values.anchoreGlobal.securityContext.fsGroup }} {{ .Values.anchoreGlobal.scratchVolume.mountPath }} )
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -87,8 +106,15 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -195,6 +221,9 @@ spec:
       {{- with .Values.anchorePolicyEngine.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
 
 ---

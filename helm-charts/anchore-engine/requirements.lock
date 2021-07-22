@@ -1,6 +1,0 @@
-dependencies:
-- name: postgresql
-  repository: ""
-  version: 1.0.1
-digest: sha256:8dfae95bad09a911924c01d899ab751db33a048b74e6397fe45a51762ddcd6c6
-generated: "2020-10-22T12:09:45.581134-07:00"

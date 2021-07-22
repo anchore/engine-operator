@@ -43,6 +43,11 @@ spec:
       {{- with .Values.anchoreEnterpriseFeeds.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_feeds_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/env: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap_env.yaml") . | sha256sum }}
+        checksum/feeds-config: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
@@ -50,6 +55,20 @@ spec:
       {{- end }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+    {{- if and .Values.anchoreGlobal.scratchVolume.fixGroupPermissions .Values.anchoreGlobal.securityContext.fsGroup }}
+      initContainers:
+        - name: mode-fixer
+          image: alpine
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: {{ $component }}-scratch
+              mountPath: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
+          command:
+            - sh
+            - -c
+            - (chmod 0775 {{ .Values.anchoreGlobal.scratchVolume.mountPath }}; chgrp {{ .Values.anchoreGlobal.securityContext.fsGroup }} {{ .Values.anchoreGlobal.scratchVolume.mountPath }} )
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -75,8 +94,15 @@ spec:
           name: feeds-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreEnterpriseFeeds.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseFeeds.existingSecret }}
+        {{- else }}
+        - secretRef:
+            name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
@@ -86,13 +112,6 @@ spec:
         {{- end }}
         {{- with .Values.anchoreEnterpriseFeeds.extraEnv }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- if not .Values.inject_secrets_via_env }}
-        - name: ANCHORE_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "anchore-engine.fullname" . }}
-              key: .feedsDbPassword
         {{- end }}
         - name: ANCHORE_POD_NAME
           valueFrom:
@@ -183,6 +202,9 @@ spec:
       {{- with .Values.anchoreEnterpriseFeeds.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
 
 ---
