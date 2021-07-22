@@ -26,13 +26,16 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # BUNDLE_IMG defines the image:tag used for the bundle. 
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= scan.connect.redhat.com/ospid-e5cf441f-cf40-4f76-a8f7-b9b8046f5264/enterprise-operator-bundle:v$(VERSION)
+BUNDLE_IMG ?= scan.connect.redhat.com/ospid-e5cf441f-cf40-4f76-a8f7-b9b8046f5264/engine-operator-bundle:v$(VERSION)
+
+# Image tag for uploading to RedHat operatorhub publishing
+REDHAT_SCAN_IMG ?= scan.connect.redhat.com/ospid-e0beb8be-3b8b-40a9-853a-ad5c227fd2a0/engine-operator:v$(VERSION)
 
 # Image URL to use all building/pushing image targets
 IMG ?= docker.io/anchore/engine-operator:v$(VERSION)
 
 # Image URL to use for RedHat OperatorHub
-REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:v$(VERSION)-r0
+REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:v$(VERSION)
 
 .PHONY: help
 help: ## Display this help.
@@ -59,6 +62,14 @@ deploy: kustomize ## Deploy controller in the configured Kubernetes cluster in ~
 undeploy: kustomize ## Undeploy controller in the configured Kubernetes cluster in ~/.kube/config
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
+.PHONY: deploy-olm
+deploy-olm: ## Deploy operator using OLM
+	operator-sdk run bundle ${BUNDLE_IMG}
+
+.PHONY: undeploy-olm
+undeploy-olm: ## Undeploy operator using OLM
+	operator-sdk cleanup anchore-engine
+
 .PHONY: docker-build
 docker-build: ## Build the docker image
 	docker build -t ${IMG} . --no-cache
@@ -69,8 +80,8 @@ docker-push: ## Push the docker image
 
 .PHONY: docker-push-redhat
 docker-push-redhat: ## Push the RedHat docker image
-	docker tag ${IMG} ${REDHAT_IMAGE}
-	docker push ${REDHAT_IMAGE}
+	docker tag ${IMG} ${REDHAT_SCAN_IMG}
+	docker push ${REDHAT_SCAN_IMG}
 
 PATH  := $(PATH):$(PWD)/bin
 SHELL := env PATH=$(PATH) /bin/sh
@@ -119,12 +130,13 @@ endef
 
 .PHONY: bundle
 export REDHATLABELS
+CREATED_AT = $(shell date)
 bundle: kustomize ## Use kustomize to create the bundle directory for pushing to the RedHat marketplace
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	echo "$$REDHATLABELS" >> bundle.Dockerfile
-	sed -i 's|REDHAT_IMAGE|$(REDHAT_IMG)|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
+	sed -i -e 's|REDHAT_IMAGE|$(REDHAT_IMG)|' -e 's|CREATED_AT|$(CREATED_AT)|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
 	operator-sdk bundle validate ./bundle
 
 .PHONY: docker-bundle-build
@@ -134,3 +146,9 @@ docker-bundle-build: bundle ## Build the bundle image.
 .PHONY: docker-bundle-push
 docker-bundle-push: ## Push the bundle image to dockerhub
 	docker push $(BUNDLE_IMG)
+
+.PHONY: clean
+clean: ## Clean up testing artifacts
+	rm -rf bundle/{manifests,metadata,scorecard,tests}
+	git restore config/manager/kustomization.yaml
+	$(MAKE) undeploy-olm

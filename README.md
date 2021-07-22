@@ -40,38 +40,43 @@ make undeploy
   * Implement all required changes for the sdk version upgrade (as well as previous versions if upgrading multiple versions) - [Upgrade SDK Version](https://sdk.operatorframework.io/docs/upgrading-sdk-version/)
 * Update `Makefile` with current operator version
 
-    ```make
-    VERSION ?= 1.0.0
-    ```
+  ```make
+  VERSION ?= 1.0.0
+  ```
 
 * Update `Dockerfile` with the current operator version
 
-    ```bash
-    LABEL name="Anchore Engine Operator" \
-      vendor="Anchore Inc." \
-      maintainer="dev@anchore.com" \
-      version="v1.0.0" \
-    ```
+  ```bash
+  LABEL name="Anchore Engine Operator" \
+    vendor="Anchore Inc." \
+    maintainer="dev@anchore.com" \
+    version="v1.0.0" \
+  ```
 
 * [Test the operator](#testing-the-operator-for-installation-with-olm)
-* Run `make bundle` to create a new operator bundle
-* Run `make docker-build` to create docker image
-* Run `make docker-push` to push `anchore/engine-operator` image
-* Run `make docker-push-redhat` to push the operator image to the RedHat Marketplace
-* Run `make docker-bundle-build` to create the bundle image
-* Run `make docker-push-bundle` to push the bundle image to the RedHat Marketplace
+* [Clean up testing artifacts](#clean-up-olm-install)
+* Create a new operator bundle and image, then push them to DockerHub & RedHat OperatorHub
+
+  ```bash
+  make docker-build
+  make docker-push
+  make docker-push-redhat
+  make docker-bundle-build
+  make docker-bundle-push
+  ```
+
 * Move the newly created bundle directories to a version specific directory under `bundle/`
 
-    ```bash
-    mkdir bundle/<OPERATOR_VERSION>
-    mv bundle/{manifests,metadata,scorecard,tests} bundle/<OPERATOR_VERSION>
-    ```
+  ```bash
+  mkdir bundle/<OPERATOR_VERSION>
+  mv bundle/{manifests,metadata,scorecard,tests} bundle/<OPERATOR_VERSION>
+  ```
 
 * Reset the manager kustomization config back to the original DockerHub image
 
-    ```bash
-    git reset --hard config/manager/kustomization.yaml
-    ```
+  ```bash
+  git restore config/manager/kustomization.yaml
+  ```
 
 * Commit all changes & push to remote branch for PR
 
@@ -98,7 +103,7 @@ crc start
 crc config set memory 16000
 eval $(crc oc-env)
 oc login -u kubeadmin -p <PASSWORD_FROM_STDOUT> https://api.crc.testing:6443
-operator-sdk run bundle "$BUNDLE_IMG"
+make deploy-olm
 crc console
 ```
 
@@ -114,19 +119,17 @@ crc console
 * Ensure that anchore-engine deployed correctly by checking the status of all pods under the `Resources` tab
 * Port forward anchore-engine API pod & check anchore-engine status
 
-    ```bash
-    kubectl port-forward svc/anchoreengine-sample-anchore-engine-api 8228:8228
-    ANCHORE_CLI_PASS=$(kubectl get secret anchoreengine-sample-anchore-engine-admin-pass -o 'go-template={{index .data "ANCHORE_ADMIN_PASSWORD"}}' | base64 -D -)
-    anchore-cli system status
-    ```
+  ```bash
+  kubectl port-forward svc/anchoreengine-sample-anchore-engine-api 8228:8228
+  ANCHORE_CLI_PASS=$(kubectl get secret anchoreengine-sample-anchore-engine-admin-pass -o 'go-template={{index .data "ANCHORE_ADMIN_PASSWORD"}}' | base64 -D -)
+  anchore-cli system status
+  ```
 
 ### Clean up OLM install
 
 ```bash
 unset IMG BUNDLE_IMG REDHAT_IMG
-rm -rf bundle/{manifests,metadata,scorecard,tests}
-git reset --hard config/manager/kustomization.yaml
-operator-sdk cleanup anchore-engine
+make clean
 crc stop
 crc delete
 ```
