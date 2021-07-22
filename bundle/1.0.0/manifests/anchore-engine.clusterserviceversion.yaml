@@ -20,8 +20,8 @@ metadata:
     capabilities: Basic Install
     categories: Security
     certified: "true"
-    containerImage: docker.io/anchore/engine-operator-dev:latest
-    createdAt: CREATED_AT
+    containerImage: registry.connect.redhat.com/anchore/engine-operator:v1.0.0
+    createdAt: Wed Jul 21 17:35:29 PDT 2021
     description: Anchore Engine - container image scanning service for policy-based
       security, best-practice and compliance enforcement.
     operators.operatorframework.io/builder: operator-sdk-v1.9.0
@@ -130,7 +130,7 @@ spec:
                 - --metrics-addr=127.0.0.1:8080
                 - --leader-elect
                 - --leader-election-id=anchore-engine
-                image: docker.io/anchore/engine-operator-dev:latest
+                image: registry.connect.redhat.com/anchore/engine-operator:v1.0.0
                 imagePullPolicy: Always
                 livenessProbe:
                   httpGet:

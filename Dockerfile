@@ -10,7 +10,14 @@ LABEL name="Anchore Engine Operator" \
       description="Anchore Engine - container image scanning service for policy-based security, best-practice and compliance enforcement."
 
 ENV HOME=/opt/helm
-COPY licenses /licesnses
+COPY licenses /licenses
 COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-charts  ${HOME}/helm-charts
+USER root
+RUN microdnf install yum \
+  && yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
+  && yum clean all \
+  && microdnf remove yum \
+  && microdnf clean all
 WORKDIR ${HOME}
+USER ${USER_UID}
