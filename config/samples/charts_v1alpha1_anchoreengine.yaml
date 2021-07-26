@@ -1,0 +1,8 @@
+apiVersion: charts.anchore.io/v1alpha1
+kind: AnchoreEngine
+metadata:
+  name: anchoreengine-sample
+spec:
+  # Default values copied from <project_dir>/helm-charts/anchore-engine/values.yaml
+  anchoreGlobal:
+    defaultAdminEmail: example@email.com

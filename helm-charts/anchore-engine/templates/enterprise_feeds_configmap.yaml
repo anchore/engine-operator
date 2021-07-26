@@ -18,6 +18,7 @@ data:
     # Anchore Enterprise Service Configuration File
     # General system-wide configuration options, these should not need to
     # be altered for basic operation
+
     service_dir: {{ .Values.anchoreGlobal.serviceDir }}
     tmp_dir: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
     log_level: {{ .Values.anchoreGlobal.logLevel }}
@@ -33,7 +34,9 @@ data:
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
     keys:
-      secret: {{ .Values.anchoreGlobal.saml.secret }}
+      {{- if or .Values.anchoreGlobal.saml.secret .Values.anchoreGlobal.saml.useExistingSecret }}
+      secret: ${ANCHORE_SAML_SECRET}
+      {{- end }}
       {{- with .Values.anchoreGlobal.saml.publicKeyName }}
       public_key_path: /home/anchore/certs/{{- . }}
       {{- end }}
@@ -55,9 +58,9 @@ data:
     credentials:
       database:
         {{- if .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
         {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
         {{- end }}
         db_connect_args:
           timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
@@ -75,6 +78,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}
         # Time delay in seconds between consecutive driver runs for processing data
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseFeeds.cycleTimers | nindent 10 }}
@@ -93,46 +97,52 @@ data:
         api_only: {{ default "false" .Values.anchoreEnterpriseFeeds.apiOnly }}
         drivers:
           # Configuration section for drivers collecting and processing feed data.
-          # All drivers are enabled by default unless explicitly disabled. npm and gem drivers are explicitly disabled out of the box
+          # All drivers are enabled by default unless explicitly disabled.
+          amzn:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.amazonDriverEnabled }}
+          alpine:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.alpineDriverEnabled }}
+          centos:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.centosDriverEnabled }}
+          debian:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.debianDriverEnabled }}
+          ol:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.olDriverEnabled }}
+          ubuntu:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled }}
+          rhel:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.rhelDriverEnabled }}
+          nvddb:
+            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.nvdDriverEnabled }}
+          # npm and gem drivers are explicitly disabled out of the box
           npm:
             enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.npmDriverEnabled }}
           gem:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
             enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
-          amzn:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.amazonDriverEnabled }}
-          centos:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.centosDriverEnabled }}
-          debian:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.debianDriverEnabled }}
-          ubuntu:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled }}
-          rhel:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.rhelDriverEnabled }}
-          ol:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.olDriverEnabled }}
-          alpine:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.alpineDriverEnabled }}
-          snyk:
-            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.snykDriverEnabled }}
-          nvddb:
-            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.nvdDriverEnabled }}
+            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
           nvdv2:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled }}
           vulndb:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
+        {{- if .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
           msrc:
-            enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
-            api_key: {{ .Values.anchoreEnterpriseFeeds.msrcApiKey }}
+            enabled: true
+            api_key: ${ANCHORE_MSRC_KEY}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
+        {{- end }}
+        {{- if .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
           github:
-            enabled: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
-            token: {{ .Values.anchoreEnterpriseFeeds.githubDriverToken }}
+            enabled: true
+            token: ${ANCHORE_GITHUB_TOKEN}
+        {{- end }}
+          grypedb:
+            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.grypeDriverEnabled }}
+            external_feeds_url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"

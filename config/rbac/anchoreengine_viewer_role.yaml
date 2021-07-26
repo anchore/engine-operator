@@ -1,0 +1,20 @@
+# permissions for end users to view anchoreengines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: anchoreengine-viewer-role
+rules:
+- apiGroups:
+  - charts.anchore.io
+  resources:
+  - anchoreengines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - charts.anchore.io
+  resources:
+  - anchoreengines/status
+  verbs:
+  - get
