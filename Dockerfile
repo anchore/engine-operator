@@ -15,7 +15,7 @@ COPY watches.yaml ${HOME}/watches.yaml
 COPY helm-charts  ${HOME}/helm-charts
 USER root
 RUN microdnf install yum \
-  && yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical \
+  && yum -y update \
   && yum clean all \
   && microdnf remove yum \
   && microdnf clean all

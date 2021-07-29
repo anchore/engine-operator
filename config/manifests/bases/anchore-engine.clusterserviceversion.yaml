@@ -72,5 +72,4 @@ spec:
   maturity: alpha
   provider:
     name: Anchore Inc.
-    url: https://anchore.com
   version: 0.0.0
