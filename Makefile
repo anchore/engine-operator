@@ -130,14 +130,15 @@ endef
 
 .PHONY: bundle
 export REDHATLABELS
-CREATED_AT = $(shell date)
+CREATED_AT = $(shell TZ=UTC date +%FT%TZ)
 bundle: kustomize ## Use kustomize to create the bundle directory for pushing to the RedHat marketplace
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG)
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	echo "$$REDHATLABELS" >> bundle.Dockerfile
-	sed -i -e 's|REDHAT_IMAGE|$(REDHAT_IMG)|' -e 's|CREATED_AT|$(CREATED_AT)|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
+	sed -i -e 's|REDHAT_IMAGE|$(REDHAT_IMG)|' -e 's|CREATED_AT|"$(CREATED_AT)"|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
 	operator-sdk bundle validate ./bundle
+	git restore config/manager/kustomization.yaml
 
 .PHONY: docker-bundle-build
 docker-bundle-build: bundle ## Build the bundle image.
