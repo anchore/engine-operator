@@ -2,9 +2,7 @@ domain: anchore.io
 layout: helm.sdk.operatorframework.io/v1
 projectName: anchore-engine
 resources:
--
-  domain: anchore.io
-  group: charts
+- group: charts
   kind: AnchoreEngine
   version: v1alpha1
 version: "3"
