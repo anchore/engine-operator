@@ -11,6 +11,9 @@ spec:
     plural: anchoreengines
     singular: anchoreengine
   scope: Namespaced
+  version: v1alpha1
+  subresources:
+    status: {}
   versions:
   - name: v1alpha1
     served: true
@@ -40,6 +43,3 @@ spec:
           type: object
           x-kubernetes-preserve-unknown-fields: true
       type: object
-    subresources:
-      status: {}
-    version: v1alpha1

@@ -133,7 +133,7 @@ export REDHATLABELS
 CREATED_AT = $(shell TZ=UTC date +%FT%TZ)
 bundle: kustomize ## Use kustomize to create the bundle directory for pushing to the RedHat marketplace
 	operator-sdk generate kustomize manifests -q
-	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG)
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG) && $(KUSTOMIZE) edit add patch --path manager_redhat_patch.yaml
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 	echo "$$REDHATLABELS" >> bundle.Dockerfile
 	sed -i -e 's|REDHAT_IMAGE|$(REDHAT_IMG)|' -e 's|CREATED_AT|"$(CREATED_AT)"|' bundle/manifests/anchore-engine.clusterserviceversion.yaml
