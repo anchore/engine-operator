@@ -11,6 +11,8 @@ spec:
     plural: anchoreengines
     singular: anchoreengine
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: AnchoreEngine is the Schema for the anchoreengines API
@@ -36,6 +38,7 @@ spec:
           type: object
           x-kubernetes-preserve-unknown-fields: true
       type: object
+  version: v1alpha1
   versions:
   - name: v1alpha1
     served: true
