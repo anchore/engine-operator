@@ -24,6 +24,54 @@ make undeploy
 
 * Install/Update operator-sdk cli tool - [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
 * Copy latest anchore-engine helm chart to `helm-charts/anchore-engine`
+* Update `config/manager/manager.yaml` ENV vars with images used by the current anchore-engine helm chart.
+
+    ```yaml
+    ...
+
+    env:
+    - name: RELATED_IMAGE_ANCHORE_ENGINE
+      value: docker.io/anchore/anchore-engine:v0.10.0
+    - name: RELATED_IMAGE_ANCHORE_ENTERPRISE
+      value: docker.io/anchore/enterprise:v3.1.0
+    - name: RELATED_IMAGE_ANCHORE_UI
+      value: docker.io/anchore/enterprise-ui:v3.1.0
+    - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
+      value: docker.io/postgres:9.6.18
+    - name: RELATED_IMAGE_ANCHORE_FEEDS_DB
+      value: docker.io/postgres:9.6.18
+    - name: RELATED_IMAGE_ANCHORE_REDIS_REGISTRY
+      value: docker.io
+    - name: RELATED_IMAGE_ANCHORE_REDIS_REPOSITORY
+      value: bitnami/redis
+    - name: RELATED_IMAGE_ANCHORE_REDIS_TAG
+      value: 6.0.8-debian-10-r0
+    ```
+
+* Update `config/manager/manager_redhat_patch.yaml` ENV vars with the current images pushed up to the RedHat image repository.
+
+    ```yaml
+    ...
+
+    env:
+    - name: RELATED_IMAGE_ANCHORE_ENGINE
+      value: registry.connect.redhat.com/anchore/engine0:v0.10.0-r0
+    - name: RELATED_IMAGE_ANCHORE_ENTERPRISE
+      value: registry.connect.redhat.com/anchore/enterprise:v3.1.0-r0
+    - name: RELATED_IMAGE_ANCHORE_UI
+      value: registry.connect.redhat.com/anchore/enterprise-ui:v3.1.0-r0
+    - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
+      value: registry.redhat.io/rhel8/postgresql-96:latest
+    - name: RELATED_IMAGE_ANCHORE_FEEDS_DB
+      value: registry.redhat.io/rhel8/postgresql-96:latest
+    - name: RELATED_IMAGE_ANCHORE_REDIS_REGISTRY
+      value: registry.redhat.io
+    - name: RELATED_IMAGE_ANCHORE_REDIS_REPOSITORY
+      value: rhel8/redis-5
+    - name: RELATED_IMAGE_ANCHORE_REDIS_TAG
+      value: latest
+    ```
+
 * Update all resource with latest operator-sdk version
   * Update `Dockerfile` with latest helm-operator image (matching the version of the operator-sdk used to update the operator)
 
