@@ -6,3 +6,17 @@ spec:
   # Default values copied from <project_dir>/helm-charts/anchore-engine/values.yaml
   anchoreGlobal:
     defaultAdminEmail: example@email.com
+  # If running on OpenShift & using RHEL based postgresql image, ensure these values are all set
+  postgresql:
+    postgresUser: anchoreengine
+    postgresPassword: anchore-postgres,123
+    postgresDatabase: anchore
+    extraEnv:
+    - name: POSTGRESQL_USER
+      value: anchoreengine
+    - name: POSTGRESQL_PASSWORD
+      value: anchore-postgres,123
+    - name: POSTGRESQL_DATABASE
+      value: anchore
+    - name: PGUSER
+      value: postgres

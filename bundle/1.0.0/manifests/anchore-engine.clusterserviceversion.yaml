@@ -13,6 +13,29 @@ metadata:
           "spec": {
             "anchoreGlobal": {
               "defaultAdminEmail": "example@email.com"
+            },
+            "postgresql": {
+              "extraEnv": [
+                {
+                  "name": "POSTGRESQL_USER",
+                  "value": "anchoreengine"
+                },
+                {
+                  "name": "POSTGRESQL_PASSWORD",
+                  "value": "anchore-postgres,123"
+                },
+                {
+                  "name": "POSTGRESQL_DATABASE",
+                  "value": "anchore"
+                },
+                {
+                  "name": "PGUSER",
+                  "value": "postgres"
+                }
+              ],
+              "postgresDatabase": "anchore",
+              "postgresPassword": "anchore-postgres,123",
+              "postgresUser": "anchoreengine"
             }
           }
         }
@@ -21,7 +44,7 @@ metadata:
     categories: Security
     certified: "true"
     containerImage: registry.connect.redhat.com/anchore/engine-operator:v1.0.0
-    createdAt: "2021-08-10T22:51:34Z"
+    createdAt: "2021-08-12T04:55:44Z"
     description: Anchore Engine - container image scanning service for policy-based
       security, best-practice and compliance enforcement.
     operators.operatorframework.io/builder: operator-sdk-v1.9.0
@@ -133,20 +156,8 @@ spec:
                 env:
                 - name: RELATED_IMAGE_ANCHORE_ENGINE
                   value: registry.connect.redhat.com/anchore/engine0:v0.10.0-r0
-                - name: RELATED_IMAGE_ANCHORE_ENTERPRISE
-                  value: registry.connect.redhat.com/anchore/enterprise:v3.1.0-r0
-                - name: RELATED_IMAGE_ANCHORE_UI
-                  value: registry.connect.redhat.com/anchore/enterprise-ui:v3.1.0-r0
                 - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
                   value: registry.redhat.io/rhel8/postgresql-96:latest
-                - name: RELATED_IMAGE_ANCHORE_FEEDS_DB
-                  value: registry.redhat.io/rhel8/postgresql-96:latest
-                - name: RELATED_IMAGE_ANCHORE_REDIS_REGISTRY
-                  value: registry.redhat.io
-                - name: RELATED_IMAGE_ANCHORE_REDIS_REPOSITORY
-                  value: rhel8/redis-5
-                - name: RELATED_IMAGE_ANCHORE_REDIS_TAG
-                  value: latest
                 image: registry.connect.redhat.com/anchore/engine-operator:v1.0.0
                 imagePullPolicy: Always
                 livenessProbe:

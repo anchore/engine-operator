@@ -11,17 +11,5 @@ spec:
           env:
           - name: RELATED_IMAGE_ANCHORE_ENGINE
             value: registry.connect.redhat.com/anchore/engine0:v0.10.0-r0
-          - name: RELATED_IMAGE_ANCHORE_ENTERPRISE
-            value: registry.connect.redhat.com/anchore/enterprise:v3.1.0-r0
-          - name: RELATED_IMAGE_ANCHORE_UI
-            value: registry.connect.redhat.com/anchore/enterprise-ui:v3.1.0-r0
           - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
             value: registry.redhat.io/rhel8/postgresql-96:latest
-          - name: RELATED_IMAGE_ANCHORE_FEEDS_DB
-            value: registry.redhat.io/rhel8/postgresql-96:latest
-          - name: RELATED_IMAGE_ANCHORE_REDIS_REGISTRY
-            value: registry.redhat.io
-          - name: RELATED_IMAGE_ANCHORE_REDIS_REPOSITORY
-            value: rhel8/redis-5
-          - name: RELATED_IMAGE_ANCHORE_REDIS_TAG
-            value: latest

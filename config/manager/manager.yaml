@@ -38,20 +38,8 @@ spec:
         env:
         - name: RELATED_IMAGE_ANCHORE_ENGINE
           value: docker.io/anchore/anchore-engine:v0.10.0
-        - name: RELATED_IMAGE_ANCHORE_ENTERPRISE
-          value: docker.io/anchore/enterprise:v3.1.0
-        - name: RELATED_IMAGE_ANCHORE_UI
-          value: docker.io/anchore/enterprise-ui:v3.1.0
         - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
           value: docker.io/postgres:9.6.18
-        - name: RELATED_IMAGE_ANCHORE_FEEDS_DB
-          value: docker.io/postgres:9.6.18
-        - name: RELATED_IMAGE_ANCHORE_REDIS_REGISTRY
-          value: docker.io
-        - name: RELATED_IMAGE_ANCHORE_REDIS_REPOSITORY
-          value: bitnami/redis
-        - name: RELATED_IMAGE_ANCHORE_REDIS_TAG
-          value: 6.0.8-debian-10-r0
         livenessProbe:
           httpGet:
             path: /healthz
