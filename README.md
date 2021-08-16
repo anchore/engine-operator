@@ -115,9 +115,7 @@ Install the following:
 ### Setup local OpenShift cluster & install operator
 
 ```bash
-export IMG="docker.io/anchore/engine-operator-dev:latest"
-export BUNDLE_IMG="docker.io/anchore/engine-operator-dev:bundle-latest"
-export REDHAT_IMG="$IMG"
+export OPERATOR_TEST_MODE=true
 make docker-build
 make docker-push
 make docker-bundle-build
@@ -152,7 +150,7 @@ crc console
 ### Clean up OLM install
 
 ```bash
-unset IMG BUNDLE_IMG REDHAT_IMG
+unset OPERATOR_TEST_MODE
 make clean
 crc stop
 crc delete

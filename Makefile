@@ -5,6 +5,17 @@
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
 VERSION ?= 1.0.0
 
+# TEST_MODE is used for testing an operator/bundle that is in develoment. This mode sets all utilized
+# images to -dev versions for local deployment.
+OPERATOR_TEST_MODE ?= false
+
+ifeq ($(OPERATOR_TEST_MODE),true)
+IMG := "docker.io/anchore/engine-operator-dev:latest"
+BUNDLE_IMG := "docker.io/anchore/engine-operator-dev:bundle-latest"
+BUNDLE_SCAN_IMG := $(BUNDLE_IMG)
+REDHAT_IMG := $(IMG)
+endif
+
 # CHANNELS define the bundle channels used in the bundle. 
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "preview,fast,stable")
 # To re-generate a bundle for other specific channels without changing the standard setup, you can:
@@ -26,7 +37,8 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # BUNDLE_IMG defines the image:tag used for the bundle. 
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= scan.connect.redhat.com/ospid-e5cf441f-cf40-4f76-a8f7-b9b8046f5264/engine-operator-bundle:v$(VERSION)
+BUNDLE_SCAN_IMG ?= scan.connect.redhat.com/ospid-e5cf441f-cf40-4f76-a8f7-b9b8046f5264/engine-operator-bundle:v$(VERSION)
+BUNDLE_IMG ?= registry.connect.redhat.com/anchore/engine-operator-bundle:v1.0.0
 
 # Image tag for uploading to RedHat operatorhub publishing
 REDHAT_SCAN_IMG ?= scan.connect.redhat.com/ospid-e0beb8be-3b8b-40a9-853a-ad5c227fd2a0/engine-operator:v$(VERSION)
@@ -146,7 +158,8 @@ docker-bundle-build: bundle ## Build the bundle image.
 
 .PHONY: docker-bundle-push
 docker-bundle-push: ## Push the bundle image to dockerhub
-	docker push $(BUNDLE_IMG)
+	docker tag $(BUNDLE_IMG) $(BUNDLE_SCAN_IMG)
+	docker push $(BUNDLE_SCAN_IMG)
 
 .PHONY: clean
 clean: ## Clean up testing artifacts
