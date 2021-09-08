@@ -3,7 +3,7 @@
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
-VERSION ?= 1.0.0
+VERSION ?= 1.0.1
 
 # TEST_MODE is used for testing an operator/bundle that is in develoment. This mode sets all utilized
 # images to -dev versions for local deployment.

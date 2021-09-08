@@ -95,7 +95,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.10.0
+  image: docker.io/anchore/anchore-engine:v0.10.2
   imagePullPolicy: IfNotPresent
 
   # Set image pull secret name if using an anchore-engine image from a private registry
@@ -200,11 +200,12 @@ anchoreGlobal:
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
-    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs only.
-    # All ssl dbConfig values are only utilized when ssl=true
+    # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
     ssl: false
+    # set sslMode to `require` to ignore verifying the root CA - see https://www.postgresql.org/docs/9.1/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslMode: verify-full
-    # sslRootCertName is the name of the postgres root CA certificate stored in anchoreGlobal.certStoreSecretName
+    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true & sslMode: verify-full' are configured.
+    # sslRootCertName describes the filename that is mounted in `/home/anchore/certs` from the secret defined in anchoreGlobal.certStoreSecretName
     sslRootCertName: Null
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
@@ -664,6 +665,15 @@ anchoreSimpleQueue:
 # Pod configuration for the helm post-install-hook engine upgrade Job
 anchoreEngineUpgradeJob:
   enabled: true
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -676,7 +686,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v3.1.0
+  image: docker.io/anchore/enterprise:v3.1.2
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -734,8 +744,6 @@ anchoreEnterpriseFeeds:
 
   # Enable microsoft feeds
   msrcDriverEnabled: false
-  # For instructions on getting API key, see the msrc section of the Feeds docs - https://docs.anchore.com/current/docs/installation/feeds/
-  msrcApiKey: null
   # Uncomment to add MSRC product IDs for generating their feed data, this extends the pre-defined list of product IDs
   # msrcWhitelist:
   # - 12345
@@ -760,10 +768,12 @@ anchoreEnterpriseFeeds:
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
-    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs
+    # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
     ssl: false
+    # set sslMode to `require` to ignore verifying the root CA - see https://www.postgresql.org/docs/9.1/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslMode: verify-full
-    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true' is configured.
+    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true & sslMode: verify-full' are configured.
+    # sslRootCertName describes the filename that is mounted in `/home/anchore/certs` from the secret defined in anchoreGlobal.certStoreSecretName
     sslRootCertName: Null
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
@@ -795,6 +805,15 @@ anchoreEnterpriseFeeds:
 # Pod configuration for the helm post-install-hook feeds upgrade Job
 anchoreEnterpriseFeedsUpgradeJob:
   enabled: true
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -912,7 +931,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.1.0
+  image: docker.io/anchore/enterprise-ui:v3.1.1
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
@@ -947,6 +966,37 @@ anchoreEnterpriseUi:
   # user session keys and data is emptied on application startup. If the datastore
   # is flushed, any users with active sessions will be required to re-authenticate.
   redisFlushdb: true
+
+  # The (optional) `force_websocket` key specifies if the WebSocket protocol must
+  # be used for socket message communications. By default, long-polling is
+  # initially used to establish the handshake between client and web service,
+  # followed by a switch to WS if the WebSocket protocol is supported.
+  #
+  # If this value is unset, or is set to anything other than a Boolean, the web
+  # service will default to `False`.
+  #
+  # This value can be overridden by using the `ANCHORE_FORCE_WEBSOCKET`
+  # environment variable.
+  #
+  forceWebsocket: false
+
+  # The (optional) `authentication_lock` keys specify if a user should be
+  # temporarily prevented from logging in to an account after one or more failed
+  # authentication attempts. For this feature to be enabled, both values must be
+  # whole numbers greater than `0`. They can be overridden by using the
+  # `ANCHORE_AUTHENTICATION_LOCK_COUNT` and `ANCHORE_AUTHENTICATION_LOCK_EXPIRES`
+  # environment variables.
+  #
+  # The `count` value represents the number of failed authentication attempts
+  # allowed to take place before a temporary lock is applied to the username. The
+  # `expires` value represents, in seconds, how long the lock will be applied for.
+  #
+  # Note that, for security reasons, when this feature is enabled it will be
+  # applied to *any* submitted username, regardless of whether the user exists.
+  #
+  authenticationLock:
+    count: 5
+    expires: 300
 
   # The (optional) `custom_links` key allows a list of up to 10 external links to
   # be provided (additional items will be excluded). The top-level `title` key
@@ -1035,6 +1085,15 @@ anchore-ui-redis:
 # Pod configuration for the helm post-install-hook enterprise engine upgrade Job
 anchoreEnterpriseEngineUpgradeJob:
   enabled: true
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
   nodeSelector: {}
   tolerations: []
   affinity: {}

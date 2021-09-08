@@ -37,7 +37,7 @@ spec:
         - "--leader-election-id=anchore-engine"
         env:
         - name: RELATED_IMAGE_ANCHORE_ENGINE
-          value: docker.io/anchore/anchore-engine:v0.10.0
+          value: docker.io/anchore/anchore-engine:v0.10.2
         - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
           value: docker.io/postgres:9.6.18
         livenessProbe:

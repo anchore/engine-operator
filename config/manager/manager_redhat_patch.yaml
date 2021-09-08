@@ -10,6 +10,6 @@ spec:
         - name: manager
           env:
           - name: RELATED_IMAGE_ANCHORE_ENGINE
-            value: registry.connect.redhat.com/anchore/engine0:v0.10.0-r0
+            value: registry.connect.redhat.com/anchore/engine0:v0.10.2-r0
           - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
             value: registry.redhat.io/rhel8/postgresql-96:latest
