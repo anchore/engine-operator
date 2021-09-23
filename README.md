@@ -52,13 +52,13 @@ make undeploy
   * Update `Dockerfile` with latest helm-operator image (matching the version of the operator-sdk used to update the operator)
 
     ```bash
-    FROM quay.io/operator-framework/helm-operator:v1.9.0
+    FROM quay.io/operator-framework/helm-operator:<LATEST_VERSION>
     ```
 
   * Update `scorecard/patches/[basic.config.yaml][olm.config.yaml]` with latest scorecard-test image (matching the version of the operator-sdk used to update the operator)
 
     ```bash
-    image: quay.io/operator-framework/scorecard-test:v1.9.0
+    image: quay.io/operator-framework/scorecard-test:<LATEST_VERSION>
     ```
 
   * Implement all required changes for the sdk version upgrade (as well as previous versions if upgrading multiple versions) - [Upgrade SDK Version](https://sdk.operatorframework.io/docs/upgrading-sdk-version/)
@@ -89,19 +89,6 @@ make undeploy
   make docker-bundle-push
   ```
 
-* Move the newly created bundle directories to a version specific directory under `bundle/`
-
-  ```bash
-  mkdir bundle/<OPERATOR_VERSION>
-  mv bundle/{manifests,metadata,scorecard,tests} bundle/<OPERATOR_VERSION>
-  ```
-
-* Reset the manager kustomization config back to the original DockerHub image
-
-  ```bash
-  git restore config/manager/kustomization.yaml
-  ```
-
 * Commit all changes & push to remote branch for PR
 
 ## Testing the Operator for installation with OLM
@@ -124,7 +111,7 @@ crc setup
 crc start
 crc config set memory 16000
 eval $(crc oc-env)
-oc login -u kubeadmin -p <PASSWORD_FROM_STDOUT> https://api.crc.testing:6443
+eval $(crc console --credentials | grep admin | cut -d"'" -f2)
 make deploy-olm
 crc console
 ```
