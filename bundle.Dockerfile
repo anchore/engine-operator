@@ -19,6 +19,6 @@ COPY bundle/manifests /manifests/
 COPY bundle/metadata /metadata/
 COPY bundle/tests/scorecard /tests/scorecard/
 # Labels for RedHat partner portal uploads to operatorhub/marketplace
-LABEL com.redhat.openshift.versions="v4.5,v4.6"
+LABEL com.redhat.openshift.versions="v4.6,v4.7,v4.8"
 LABEL com.redhat.delivery.operator.bundle=true
 LABEL com.redhat.delivery.backport=true
