@@ -102,18 +102,7 @@ Install the following:
 ### Setup local OpenShift cluster & install operator
 
 ```bash
-export OPERATOR_TEST_MODE=true
-make docker-build
-make docker-push
-make docker-bundle-build
-make docker-bundle-push
-crc setup
-crc start
-crc config set memory 16000
-eval $(crc oc-env)
-eval $(crc console --credentials | grep admin | cut -d"'" -f2)
-make deploy-olm
-crc console
+make test
 ```
 
 ### From the crc console, install an instance of anchore-engine using the operator

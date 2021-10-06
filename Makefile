@@ -7,10 +7,10 @@ VERSION ?= 1.0.1
 
 # TEST_MODE is used for testing an operator/bundle that is in develoment. This mode sets all utilized
 # images to -dev versions for local deployment.
-OPERATOR_TEST_MODE ?= false
+TEST_MODE ?= false
 
 # If in operator testing mode, use development images for bundle & image creation
-ifeq ($(OPERATOR_TEST_MODE),true)
+ifeq ($(TEST_MODE),true)
 IMG := "docker.io/anchore/engine-operator-dev:latest"
 BUNDLE_IMG := "docker.io/anchore/engine-operator-dev:bundle-latest"
 BUNDLE_SCAN_IMG := $(BUNDLE_IMG)
@@ -147,7 +147,7 @@ CREATED_AT = $(shell TZ=UTC date +%FT%TZ)
 bundle: kustomize ## Use kustomize to create the bundle directory for pushing to the RedHat marketplace
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(REDHAT_IMG)
-	if ! $(OPERATOR_TEST_MODE); then \
+	if ! $(TEST_MODE); then \
 		cd config/manager && $(KUSTOMIZE) edit add patch --path manager_redhat_patch.yaml; \
 	fi
 	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
@@ -159,7 +159,7 @@ bundle: kustomize ## Use kustomize to create the bundle directory for pushing to
 .PHONY: docker-bundle-build
 docker-bundle-build: bundle ## Build the bundle image.
 	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) . --no-cache
-	if ! $(OPERATOR_TEST_MODE); then \
+	if ! $(TEST_MODE); then \
 		mkdir -p bundle/$(VERSION); \
 		mv bundle/{manifests,metadata,tests} bundle/$(VERSION)/; \
 	fi
@@ -168,6 +168,20 @@ docker-bundle-build: bundle ## Build the bundle image.
 docker-bundle-push: ## Push the bundle image to dockerhub
 	docker tag $(BUNDLE_IMG) $(BUNDLE_SCAN_IMG)
 	docker push $(BUNDLE_SCAN_IMG)
+
+.PHONY: test
+test: ## Test olm deployment using crc
+	TEST_MODE=true $(MAKE) docker-build
+	TEST_MODE=true $(MAKE) docker-push
+	TEST_MODE=true $(MAKE) docker-bundle-build
+	TEST_MODE=true $(MAKE) docker-bundle-push
+	crc setup
+	crc start
+	crc config set memory 16000
+	eval $(crc oc-env)
+	eval $(crc console --credentials | grep admin | cut -d"'" -f2)
+	TEST_MODE=true $(MAKE) deploy-olm
+	crc console
 
 .PHONY: clean
 clean: ## Clean up testing artifacts
