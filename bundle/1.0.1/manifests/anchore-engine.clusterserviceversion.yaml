@@ -44,7 +44,7 @@ metadata:
     categories: Security
     certified: "true"
     containerImage: registry.connect.redhat.com/anchore/engine-operator:v1.0.1
-    createdAt: "2021-10-06T08:15:54Z"
+    createdAt: "2021-10-06T23:52:15Z"
     description: Anchore Engine - container image scanning service for policy-based
       security, best-practice and compliance enforcement.
     operators.operatorframework.io/builder: operator-sdk-v1.13.0
