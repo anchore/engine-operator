@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM quay.io/operator-framework/helm-operator:v1.12
+FROM quay.io/operator-framework/helm-operator:v1.13
 
 LABEL name="Anchore Engine Operator" \
       vendor="Anchore Inc." \
