@@ -37,7 +37,7 @@ spec:
         - "--leader-election-id=anchore-engine"
         env:
         - name: RELATED_IMAGE_ANCHORE_ENGINE
-          value: docker.io/anchore/anchore-engine:v0.10.0
+          value: docker.io/anchore/anchore-engine:v1.0.0
         - name: RELATED_IMAGE_ANCHORE_POSTGRESQL
           value: docker.io/postgres:9.6.18
         livenessProbe:
@@ -54,8 +54,8 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: 100m
-            memory: 90Mi
+            cpu: 200m
+            memory: 100Mi
           requests:
             cpu: 100m
             memory: 60Mi
