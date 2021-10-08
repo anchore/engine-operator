@@ -77,10 +77,18 @@ undeploy: kustomize ## Undeploy controller in the configured Kubernetes cluster 
 
 .PHONY: deploy-olm
 deploy-olm: ## Deploy operator using OLM
+	if $(TEST_MODE); then \
+		eval $$(crc oc-env) && \
+		eval $$(crc console --credentials | grep admin | cut -d"'" -f2); \
+	fi; \
 	operator-sdk run bundle $(BUNDLE_IMG)
 
 .PHONY: undeploy-olm
 undeploy-olm: ## Undeploy operator using OLM
+	if $(TEST_MODE); then \
+		eval $$(crc oc-env) && \
+		eval $$(crc console --credentials | grep admin | cut -d"'" -f2); \
+	fi; \
 	operator-sdk cleanup anchore-engine
 
 .PHONY: docker-build
@@ -170,16 +178,17 @@ docker-bundle-push: ## Push the bundle image to dockerhub
 	docker push $(BUNDLE_SCAN_IMG)
 
 .PHONY: test
+test: SKIP_DOCKER ?= false
 test: ## Test olm deployment using crc
 	TEST_MODE=true $(MAKE) docker-build
 	TEST_MODE=true $(MAKE) docker-push
 	TEST_MODE=true $(MAKE) docker-bundle-build
 	TEST_MODE=true $(MAKE) docker-bundle-push
-	crc setup
-	crc start
-	crc config set memory 16000
-	eval $(crc oc-env)
-	eval $(crc console --credentials | grep admin | cut -d"'" -f2)
+	if ! crc status | grep "Running"; then \
+		crc setup && \
+		crc config set memory 16000 && \
+		 crc start; \
+	fi
 	TEST_MODE=true $(MAKE) deploy-olm
 	crc console
 
