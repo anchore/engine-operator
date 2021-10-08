@@ -22,7 +22,7 @@ IMG ?= docker.io/anchore/engine-operator:v$(VERSION)
 
 # BUNDLE_IMG defines the image:tag used for the bundle. 
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= registry.connect.redhat.com/anchore/engine-operator-bundle:$(VERSION)
+BUNDLE_IMG ?= registry.connect.redhat.com/anchore/engine-operator-bundle:v$(VERSION)
 
 # Image URL to use for RedHat OperatorHub
 REDHAT_IMG ?= registry.connect.redhat.com/anchore/engine-operator:v$(VERSION)
